@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:proyectomiguelangel.Converters"
+             x:Class="proyectomiguelangel.LyricsSearchPage"
+             Title="Buscar Letras">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <!-- Fila 0: Búsqueda -->
+        <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="15">
+            <Entry x:Name="txtBusqueda"
+                   Placeholder="Escribe parte de la letra..."
+                   FontSize="18" />
+
+            <Button Text="Buscar canción"
+                    Clicked="OnBuscarClicked"
+                    BackgroundColor="#2196F3"
+                    TextColor="White" />
+        </VerticalStackLayout>
+
+        <!-- Fila 1: Loading Indicator -->
+        <ActivityIndicator Grid.Row="1"
+                           x:Name="LoadingIndicator"
+                           IsVisible="False"
+                           IsRunning="False"
+                           Color="#2196F3"
+                           HeightRequest="30"
+                           HorizontalOptions="Center"
+                           Margin="0,0,0,10" />
+
+        <!-- Fila 2: Lista de canciones CON SCROLL -->
+        <ScrollView Grid.Row="2">
+            <CollectionView x:Name="ListaResultados">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" Margin="10,5">
+                            <Grid ColumnDefinitions="80,*" 
+                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                                  ColumnSpacing="10"
+                                  RowSpacing="5">
+
+                                <!-- Carátula -->
+                                <Image Grid.Row="0" Grid.RowSpan="5" Grid.Column="0"
+                                       Aspect="AspectFill"
+                                       BackgroundColor="LightGray"
+                                       HeightRequest="80">
+                                    <Image.Source>
+                                        <UriImageSource Uri="{Binding CoverArt}" 
+                                                       CacheValidity="1:00:00:00" />
+                                    </Image.Source>
+                                </Image>
+
+                                <Label Grid.Row="0" Grid.RowSpan="5" Grid.Column="0"
+                                       Text="🎵" 
+                                       FontSize="24"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"
+                                       IsVisible="{Binding CoverArt, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
+
+                                <!-- Información -->
+                                <Label Grid.Row="0" Grid.Column="1" 
+                                       Text="{Binding Title}" 
+                                       FontAttributes="Bold" 
+                                       FontSize="16" 
+                                       LineBreakMode="TailTruncation" />
+
+                                <Label Grid.Row="1" Grid.Column="1" 
+                                       Text="{Binding Artist}" 
+                                       FontSize="14" 
+                                       TextColor="Gray"
+                                       LineBreakMode="TailTruncation" />
+
+                                <Label Grid.Row="2" Grid.Column="1" 
+                                       Text="{Binding Album}" 
+                                       FontSize="12" 
+                                       TextColor="DarkGray"
+                                       LineBreakMode="TailTruncation" />
+
+                                <!-- LETRA - SOLO UNA VERSIÓN -->
+                                <Frame Grid.Row="3" Grid.Column="1"
+                                       BackgroundColor="{Binding LyricsBackgroundColor}"
+                                       BorderColor="{Binding LyricsBorderColor}"
+                                       Padding="8"
+                                       Margin="0,5,0,0">
+                                    <Label Text="{Binding DisplayLyrics}" 
+                                           FontSize="11"
+                                           TextColor="{Binding LyricsTextColor}"
+                                           LineBreakMode="WordWrap"
+                                           MaxLines="3" />
+                                </Frame>
+
+                                <!-- Botón de preview -->
+                                <Grid Grid.Row="4" Grid.Column="1" 
+                                      ColumnDefinitions="*,Auto" 
+                                      VerticalOptions="Center"
+                                      Margin="0,5,0,0">
+
+                                    <Button Grid.Column="0"
+                                            Text="{Binding PlayButtonText}"
+                                            Clicked="OnPlayPreviewClicked"
+                                            BackgroundColor="{Binding PlayButtonColor}"
+                                            TextColor="White"
+                                            FontSize="11"
+                                            HeightRequest="28"
+                                            IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}"
+                                            CommandParameter="{Binding .}" />
+
+                                    <ActivityIndicator Grid.Column="1"
+                                                       IsVisible="False"
+                                                       IsRunning="False"
+                                                       Color="#2196F3" />
+
+                                    <Label Grid.Column="0"
+                                           Text="🎵 Preview no disponible"
+                                           FontSize="11"
+                                           TextColor="Orange"
+                                           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
+                                </Grid>
+
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <!-- Fila 3: Reproductor SIEMPRE VISIBLE cuando está activo -->
+        <Frame Grid.Row="3"
+               x:Name="AudioPlayerFrame"
+               IsVisible="False"
+               BackgroundColor="#E3F2FD"
+               Padding="15"
+               Margin="10,5,10,10">
+            <VerticalStackLayout Spacing="10">
+                <Label x:Name="NowPlayingLabel"
+                       Text="Reproduciendo..." 
+                       FontSize="14" 
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <Frame x:Name="LyricsMatchFrame"
+                       IsVisible="False"
+                       BackgroundColor="#E8F5E8"
+                       Padding="10">
+                    <Label x:Name="LyricsMatchLabel"
+                           Text=""
+                           FontSize="12"
+                           TextColor="#1B5E20"
+                           LineBreakMode="WordWrap" />
+                </Frame>
+
+                <Grid ColumnDefinitions="*,*,*" 
+                      ColumnSpacing="10"
+                      HorizontalOptions="Center">
+
+                    <Button x:Name="PlayButton"
+                            Grid.Column="0"
+                            Text="▶ Play"
+                            Clicked="OnPlayAudioClicked"
+                            BackgroundColor="#4CAF50"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35" />
+
+                    <Button x:Name="PauseButton"
+                            Grid.Column="1"
+                            Text="⏸️ Pause"
+                            Clicked="OnPauseAudioClicked"
+                            BackgroundColor="#FF9800"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35" />
+
+                    <Button x:Name="StopButton"
+                            Grid.Column="2"
+                            Text="⏹️ Stop"
+                            Clicked="OnStopAudioClicked"
+                            BackgroundColor="#F44336"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35" />
+                </Grid>
+
+                <ProgressBar x:Name="AudioProgressBar"
+                             Progress="0"
+                             HeightRequest="10" />
+
+                <Label x:Name="TimeLabel"
+                       Text="00:00 / 00:30"
+                       FontSize="12"
+                       TextColor="#666"
+                       HorizontalOptions="Center" />
+
+                <Button Text="❌ Cerrar Reproductor"
+                        Clicked="OnClosePlayerClicked"
+                        BackgroundColor="#9C27B0"
+                        TextColor="White"
+                        FontSize="12"
+                        HorizontalOptions="End" />
+            </VerticalStackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>

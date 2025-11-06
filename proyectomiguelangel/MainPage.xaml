@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:local="clr-namespace:proyectomiguelangel"
+            x:Class="proyectomiguelangel.MainPage"
+            Title="Song Finder 🎵">
+
+    <TabbedPage.Children>
+        <!-- Pestaña 1: Buscador de Letras -->
+        <local:LyricsSearchPage Title="🔍 Buscar Letras" />
+
+        <!-- Pestaña 2: Shazam-like -->
+        <local:AudioRecognitionPage Title="🎤 Identificar Canción" />
+
+        <!-- Pestaña 3: IA Transcripción -->
+        <local:LyricsTranscriptionPage Title="📝 Transcribir Letras" />
+    </TabbedPage.Children>
+</TabbedPage>
