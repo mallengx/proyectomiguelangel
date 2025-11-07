@@ -16,12 +16,10 @@ namespace proyectomiguelangel
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Registrar el servicio de Audio
-            builder.Services.AddSingleton(AudioManager.Current);
-
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
+            builder.Services.AddSingleton(AudioManager.Current);
 
             return builder.Build();
         }

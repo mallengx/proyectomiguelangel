@@ -1,18 +1,123 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="proyectomiguelangel.AudioRecognitionPage"
-             Title="Reconocer Canción">
-    <VerticalStackLayout Padding="30" Spacing="20">
-        <Label x:Name="StatusLabel"
-               Text="Pulsa para grabar una canción..."
-               HorizontalOptions="Center"
-               FontSize="18"/>
-        <Button x:Name="RecordButton"
-                Text="Iniciar grabación"
-                Clicked="OnRecordButtonClicked"
-                BackgroundColor="#0078D7"
-                TextColor="White"
-                CornerRadius="20"
-                Padding="15,10"/>
-    </VerticalStackLayout>
+             Title="Identificar Canción">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🎤 Identificador de Canciones" 
+                           FontSize="20" 
+                           FontAttributes="Bold" 
+                           HorizontalOptions="Center" />
+
+                    <Label Text="Graba un fragmento de audio para identificar la canción (como Shazam)" 
+                           FontSize="14" 
+                           TextColor="#666"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Estado de grabación -->
+            <Frame x:Name="RecordingStatusFrame"
+                   IsVisible="False"
+                   BackgroundColor="#FFF3E0"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <ActivityIndicator x:Name="RecordingIndicator"
+                                      IsRunning="True"
+                                      Color="#FF9800" />
+                    <Label x:Name="RecordingStatusLabel"
+                           Text="Escuchando..."
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center" />
+                    <Label Text="Reproduce la canción que quieres identificar"
+                           FontSize="12"
+                           TextColor="#666"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Controles de grabación -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
+                <Button x:Name="StartRecordingButton"
+                        Grid.Column="0"
+                        Text="🎤 Iniciar Grabación"
+                        Clicked="OnStartRecordingClicked"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50" />
+
+                <Button x:Name="StopRecordingButton"
+                        Grid.Column="1"
+                        Text="⏹️ Detener"
+                        Clicked="OnStopRecordingClicked"
+                        BackgroundColor="#F44336"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50"
+                        IsEnabled="False" />
+            </Grid>
+
+            <!-- Resultados -->
+            <Frame x:Name="ResultsFrame"
+                   IsVisible="False"
+                   BackgroundColor="#E8F5E8"
+                   Padding="15"
+                   CornerRadius="10">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🎵 Canción Identificada" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#1B5E20" />
+
+                    <Label x:Name="SongTitleLabel"
+                           Text=""
+                           FontSize="16"
+                           FontAttributes="Bold" />
+
+                    <Label x:Name="ArtistLabel"
+                           Text=""
+                           FontSize="14"
+                           TextColor="#666" />
+
+                    <Label x:Name="AlbumLabel"
+                           Text=""
+                           FontSize="12"
+                           TextColor="#888" />
+
+                    <Button Text="🔍 Buscar Letra"
+                            Clicked="OnSearchLyricsClicked"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="14" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Información -->
+            <Frame BackgroundColor="#F5F5F5" Padding="15" CornerRadius="10">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="💡 Cómo usar:" 
+                           FontSize="16" 
+                           FontAttributes="Bold" />
+                    <Label Text="• Haz clic en 'Iniciar Grabación'" 
+                           FontSize="12" />
+                    <Label Text="• Reproduce la canción que quieres identificar" 
+                           FontSize="12" />
+                    <Label Text="• Haz clic en 'Detener' después de 10-15 segundos" 
+                           FontSize="12" />
+                    <Label Text="• La aplicación identificará la canción automáticamente" 
+                           FontSize="12" />
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
