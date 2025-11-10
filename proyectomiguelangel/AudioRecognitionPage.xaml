@@ -10,6 +10,7 @@
             <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🎤 Identificador de Canciones" 
+                           TextColor="#666"
                            FontSize="20" 
                            FontAttributes="Bold" 
                            HorizontalOptions="Center" />
@@ -106,15 +107,21 @@
                 <VerticalStackLayout Spacing="8">
                     <Label Text="💡 Cómo usar:" 
                            FontSize="16" 
-                           FontAttributes="Bold" />
+                           FontAttributes="Bold"
+                           TextColor="#666"/>
                     <Label Text="• Haz clic en 'Iniciar Grabación'" 
-                           FontSize="12" />
+                           FontSize="12" 
+                           TextColor="#666"/>
                     <Label Text="• Reproduce la canción que quieres identificar" 
-                           FontSize="12" />
+                           FontSize="12"
+                           TextColor="#666"
+                           />
                     <Label Text="• Haz clic en 'Detener' después de 10-15 segundos" 
-                           FontSize="12" />
+                           FontSize="12"
+                           TextColor="#666"/>
                     <Label Text="• La aplicación identificará la canción automáticamente" 
-                           FontSize="12" />
+                           FontSize="12" 
+                           TextColor="#666"/>
                 </VerticalStackLayout>
             </Frame>
 

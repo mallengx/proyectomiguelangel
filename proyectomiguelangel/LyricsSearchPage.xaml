@@ -82,15 +82,14 @@
                                        TextColor="DarkGray"
                                        LineBreakMode="TailTruncation" />
 
-                                <!-- LETRA - SOLO UNA VERSIÓN -->
+                                <!-- LETRA - SOLO UNA VERSIÓN (ACTUALIZADO) -->
                                 <Frame Grid.Row="3" Grid.Column="1"
                                        BackgroundColor="{Binding LyricsBackgroundColor}"
                                        BorderColor="{Binding LyricsBorderColor}"
                                        Padding="8"
                                        Margin="0,5,0,0">
-                                    <Label Text="{Binding DisplayLyrics}" 
+                                    <Label FormattedText="{Binding FormattedLyrics}" 
                                            FontSize="11"
-                                           TextColor="{Binding LyricsTextColor}"
                                            LineBreakMode="WordWrap"
                                            MaxLines="3" />
                                 </Frame>
