@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Json;
+﻿using Plugin.Maui.Audio;
+using System.Net.Http.Json;
+using System.Text.RegularExpressions;
+using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Plugin.Maui.Audio;
-using Microsoft.Maui.Controls; // Para FormattedString y Span
 
 namespace proyectomiguelangel
 {
@@ -34,34 +36,35 @@ namespace proyectomiguelangel
 
             try
             {
-                // PRIMERO buscar en Deezer para obtener canciones
-                string searchQuery = _searchText;
-                var deezerTracks = await SearchDeezerTracks(searchQuery);
+                string apiKey = "e191f6e3afa72a4b476998e86a7f9ba3";
+                string url = $"https://api.audd.io/findLyrics/?q={Uri.EscapeDataString(_searchText)}&api_token={apiKey}";
 
-                if (deezerTracks != null && deezerTracks.Count > 0)
+                using HttpClient client = new HttpClient();
+                var response = await client.GetFromJsonAsync<AuddLyricsResponse>(url);
+
+                if (response?.Result != null && response.Result.Count > 0)
                 {
                     var processedResults = new List<SongResult>();
-                    var lyricsTasks = new List<Task<SongResult>>();
+                    var deezerTasks = new List<Task<SongResult>>();
 
-                    foreach (var track in deezerTracks.Take(10))
+                    foreach (var song in response.Result.Take(10))
                     {
                         var songResult = new SongResult
                         {
-                            Title = CleanTitle(track.Title ?? string.Empty),
-                            Artist = CleanArtist(track.Artist?.Name ?? string.Empty),
-                            Album = track.Album?.Title ?? string.Empty,
-                            CoverArt = track.Album?.CoverMedium ?? string.Empty,
-                            PreviewUrl = track.Preview ?? string.Empty,
-                            DeezerId = track.Id.ToString()
+                            Title = CleanTitle(song.Title ?? string.Empty),
+                            Artist = CleanArtist(song.Artist ?? string.Empty),
+                            Lyrics = song.Lyrics ?? string.Empty,
+                            Album = song.Album ?? string.Empty
                         };
 
-                        // Buscar letras usando Lyrics.ovh
-                        var lyricsTask = SearchLyricsAsync(songResult);
-                        lyricsTasks.Add(lyricsTask);
+                        // Procesar la letra ANTES de buscar en Deezer
+                        ProcessLyricsForDisplay(songResult, _searchText);
+                        var deezerTask = SearchDeezerInfoAsync(songResult);
+                        deezerTasks.Add(deezerTask);
                     }
 
-                    var resultsWithLyrics = await Task.WhenAll(lyricsTasks);
-                    processedResults.AddRange(resultsWithLyrics);
+                    var resultsWithDeezer = await Task.WhenAll(deezerTasks);
+                    processedResults.AddRange(resultsWithDeezer);
 
                     ListaResultados.ItemsSource = processedResults;
 
@@ -81,7 +84,7 @@ namespace proyectomiguelangel
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", $"Hubo un problema al conectar con los servicios:\n{ex.Message}", "OK");
+                await DisplayAlert("Error", $"Hubo un problema al conectar con la API:\n{ex.Message}", "OK");
                 ListaResultados.ItemsSource = null;
             }
             finally
@@ -91,92 +94,19 @@ namespace proyectomiguelangel
             }
         }
 
-        // Buscar múltiples tracks en Deezer
-        private async Task<List<DeezerTrack>> SearchDeezerTracks(string searchQuery)
-        {
-            try
-            {
-                string deezerUrl = $"https://api.deezer.com/search?q={Uri.EscapeDataString(searchQuery)}&limit=15";
-
-                using HttpClient client = new HttpClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (compatible; SongFinder/1.0)");
-
-                var response = await client.GetFromJsonAsync<DeezerResponse>(deezerUrl);
-                return response?.Data ?? new List<DeezerTrack>();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error en búsqueda Deezer: {ex.Message}");
-                return new List<DeezerTrack>();
-            }
-        }
-
-        // Buscar letras usando Lyrics.ovh (API gratuita y sin autenticación)
-        private async Task<SongResult> SearchLyricsAsync(SongResult songResult)
-        {
-            try
-            {
-                string artist = Uri.EscapeDataString(songResult.Artist);
-                string title = Uri.EscapeDataString(songResult.Title);
-
-                string lyricsUrl = $"https://api.lyrics.ovh/v1/{artist}/{title}";
-
-                using HttpClient client = new HttpClient();
-                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (compatible; SongFinder/1.0)");
-                client.Timeout = TimeSpan.FromSeconds(10);
-
-                var response = await client.GetFromJsonAsync<LyricsOvhResponse>(lyricsUrl);
-
-                if (response != null && !string.IsNullOrEmpty(response.Lyrics))
-                {
-                    songResult.Lyrics = response.Lyrics;
-                    ProcessLyricsForDisplay(songResult, _searchText);
-                }
-                else
-                {
-                    songResult.Lyrics = "Letra no disponible";
-                    songResult.DisplayLyrics = "Letra no encontrada";
-                    songResult.FormattedLyrics = new FormattedString();
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error obteniendo letras para {songResult.Title}: {ex.Message}");
-                songResult.Lyrics = "Error al cargar letra";
-                songResult.DisplayLyrics = "Error al cargar letra";
-                songResult.FormattedLyrics = new FormattedString();
-
-                // Procesar igual para mostrar algo
-                ProcessLyricsForDisplay(songResult, _searchText);
-            }
-
-            return songResult;
-        }
-
-        // Procesar letra para mostrar CON FORMATO
+        // NUEVO MÉTODO: Procesar letra para mostrar
         private void ProcessLyricsForDisplay(SongResult songResult, string searchText)
         {
-            if (string.IsNullOrEmpty(songResult.Lyrics) || songResult.Lyrics == "Letra no disponible" || songResult.Lyrics == "Error al cargar letra")
+            if (string.IsNullOrEmpty(songResult.Lyrics) || string.IsNullOrEmpty(searchText))
             {
-                songResult.DisplayLyrics = songResult.Lyrics;
-                songResult.FormattedLyrics = new FormattedString();
-
-                if (!string.IsNullOrEmpty(songResult.Lyrics))
-                {
-                    songResult.FormattedLyrics.Spans.Add(new Span
-                    {
-                        Text = songResult.Lyrics,
-                        TextColor = Colors.Gray,
-                        FontSize = 11
-                    });
-                }
-
-                songResult.HasExactMatch = false;
+                songResult.FormattedLyrics = CreateFormattedString("Letra no disponible", string.Empty);
+                songResult.DisplayLyrics = "Letra no disponible";
                 return;
             }
 
             try
             {
+                // Buscar coincidencia exacta ignorando mayúsculas/minúsculas
                 var regex = new Regex(Regex.Escape(searchText), RegexOptions.IgnoreCase);
                 var match = regex.Match(songResult.Lyrics);
 
@@ -185,117 +115,144 @@ namespace proyectomiguelangel
                     songResult.HasExactMatch = true;
                     songResult.LyricsMatchPosition = match.Index;
 
-                    // Crear FormattedString para resaltar el texto
-                    var formattedString = new FormattedString();
+                    // Extraer contexto alrededor de la búsqueda
+                    int start = Math.Max(0, match.Index - 30);
+                    int end = Math.Min(songResult.Lyrics.Length, match.Index + match.Length + 30);
+                    int length = end - start;
 
-                    int contextChars = 25; // Caracteres de contexto antes y después
-                    int start = Math.Max(0, match.Index - contextChars);
-                    int end = Math.Min(songResult.Lyrics.Length, match.Index + match.Length + contextChars);
+                    string context = songResult.Lyrics.Substring(start, length);
+                    string originalMatch = songResult.Lyrics.Substring(match.Index, match.Length);
 
-                    // Texto antes del match
-                    if (start > 0)
-                    {
-                        formattedString.Spans.Add(new Span
-                        {
-                            Text = "...",
-                            TextColor = Colors.Gray,
-                            FontSize = 11
-                        });
-                    }
+                    // Crear texto formateado con resaltado
+                    songResult.FormattedLyrics = CreateHighlightedText(context, originalMatch, searchText);
 
-                    string beforeMatch = songResult.Lyrics.Substring(start, match.Index - start);
-                    formattedString.Spans.Add(new Span
-                    {
-                        Text = beforeMatch,
-                        TextColor = Colors.Gray,
-                        FontSize = 11
-                    });
+                    if (start > 0) context = "..." + context;
+                    if (end < songResult.Lyrics.Length) context = context + "...";
 
-                    // El match resaltado - MÁS VISIBLE
-                    string matchedText = songResult.Lyrics.Substring(match.Index, match.Length);
-                    formattedString.Spans.Add(new Span
-                    {
-                        Text = matchedText,
-                        TextColor = Color.FromArgb("#FFFFFF"), // Texto blanco
-                        BackgroundColor = Color.FromArgb("#FF5722"), // Fondo naranja
-                        FontAttributes = FontAttributes.Bold,
-                        FontSize = 11
-                    });
+                    songResult.DisplayLyrics = context;
 
-                    // Texto después del match
-                    int afterMatchStart = match.Index + match.Length;
-                    int afterMatchLength = end - afterMatchStart;
-                    if (afterMatchLength > 0)
-                    {
-                        string afterMatch = songResult.Lyrics.Substring(afterMatchStart, afterMatchLength);
-                        formattedString.Spans.Add(new Span
-                        {
-                            Text = afterMatch,
-                            TextColor = Colors.Gray,
-                            FontSize = 11
-                        });
-                    }
-
-                    if (end < songResult.Lyrics.Length)
-                    {
-                        formattedString.Spans.Add(new Span
-                        {
-                            Text = "...",
-                            TextColor = Colors.Gray,
-                            FontSize = 11
-                        });
-                    }
-
-                    songResult.FormattedLyrics = formattedString;
-                    songResult.DisplayLyrics = formattedString.ToString();
+                    // Calcular tiempo estimado
                     songResult.EstimatedStartTime = CalculateEstimatedTime(songResult.Lyrics, match.Index);
                 }
                 else
                 {
-                    // Si no hay match exacto, mostrar inicio de la letra
-                    string shortLyrics = songResult.Lyrics.Length > 100
+                    // Si no hay coincidencia exacta, mostrar inicio de la letra
+                    string previewText = songResult.Lyrics.Length > 100
                         ? songResult.Lyrics.Substring(0, 100) + "..."
                         : songResult.Lyrics;
 
-                    var formattedString = new FormattedString();
-                    formattedString.Spans.Add(new Span
-                    {
-                        Text = shortLyrics,
-                        TextColor = Colors.Gray,
-                        FontSize = 11
-                    });
-
-                    songResult.DisplayLyrics = shortLyrics;
-                    songResult.FormattedLyrics = formattedString;
+                    songResult.FormattedLyrics = CreateFormattedString(previewText, string.Empty);
+                    songResult.DisplayLyrics = previewText;
                     songResult.HasExactMatch = false;
                     songResult.EstimatedStartTime = 0;
                 }
             }
             catch (Exception ex)
             {
-                // Manejo de error mejorado
-                var errorFormatted = new FormattedString();
-                errorFormatted.Spans.Add(new Span
-                {
-                    Text = "Error al procesar letra",
-                    TextColor = Colors.Red,
-                    FontSize = 11
-                });
-
+                songResult.FormattedLyrics = CreateFormattedString("Error al procesar letra", string.Empty);
                 songResult.DisplayLyrics = "Error al procesar letra";
-                songResult.FormattedLyrics = errorFormatted;
                 System.Diagnostics.Debug.WriteLine($"Error procesando letras: {ex.Message}");
             }
         }
+        private FormattedString CreateHighlightedText(string context, string originalMatch, string searchText)
+        {
+            var formattedString = new FormattedString();
+
+            try
+            {
+                int matchIndex = context.IndexOf(originalMatch, StringComparison.Ordinal);
+
+                if (matchIndex >= 0)
+                {
+                    // Texto antes del match
+                    if (matchIndex > 0)
+                    {
+                        string before = context.Substring(0, matchIndex);
+                        formattedString.Spans.Add(new Span
+                        {
+                            Text = before,
+                            FontSize = 11,
+                            TextColor = Colors.Gray
+                        });
+                    }
+
+                    // Texto resaltado (el match)
+                    formattedString.Spans.Add(new Span
+                    {
+                        Text = originalMatch,
+                        FontSize = 11,
+                        FontAttributes = FontAttributes.Bold,
+                        TextColor = Color.FromArgb("#E65100"), // Naranja oscuro
+                        BackgroundColor = Color.FromArgb("#FFF3E0") // Fondo naranja claro
+                    });
+
+                    // Texto después del match
+                    int afterStart = matchIndex + originalMatch.Length;
+                    if (afterStart < context.Length)
+                    {
+                        string after = context.Substring(afterStart);
+                        formattedString.Spans.Add(new Span
+                        {
+                            Text = after,
+                            FontSize = 11,
+                            TextColor = Colors.Gray
+                        });
+                    }
+                }
+                else
+                {
+                    // Fallback si no se encuentra el match en el contexto
+                    formattedString.Spans.Add(new Span
+                    {
+                        Text = context,
+                        FontSize = 11,
+                        TextColor = Colors.Gray
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error creando texto resaltado: {ex.Message}");
+                formattedString.Spans.Add(new Span
+                {
+                    Text = context,
+                    FontSize = 11,
+                    TextColor = Colors.Gray
+                });
+            }
+
+            return formattedString;
+        }
+
+        private FormattedString CreateFormattedString(string text, string highlight)
+        {
+            var formattedString = new FormattedString();
+            formattedString.Spans.Add(new Span
+            {
+                Text = text,
+                FontSize = 11,
+                TextColor = Colors.Gray
+            });
+            return formattedString;
+        }
+
         private double CalculateEstimatedTime(string lyrics, int position)
         {
             if (string.IsNullOrEmpty(lyrics) || position <= 0) return 0;
 
             try
             {
-                double totalDuration = 30.0;
+                // Método más preciso: calcular basado en la posición relativa en el texto
+                // Asumimos que la canción completa tiene una duración típica de preview (30 segundos)
+                double totalDuration = 30.0; // Los previews de Deezer son de 30 segundos
+
+                // Calcular la posición relativa en el texto
                 double relativePosition = (double)position / lyrics.Length;
-                double estimatedTime = relativePosition * Math.Min(totalDuration, 25);
+
+                // Ajustar para que no empiece demasiado tarde en previews cortos
+                double estimatedTime = relativePosition * Math.Min(totalDuration, 25); // Máximo 25 segundos
+
+                // Asegurar que no sea demasiado corto o largo
                 estimatedTime = Math.Max(0, Math.Min(estimatedTime, 25));
 
                 return estimatedTime;
@@ -346,12 +303,78 @@ namespace proyectomiguelangel
             return artist;
         }
 
+        private async Task<SongResult> SearchDeezerInfoAsync(SongResult songResult)
+        {
+            try
+            {
+                string searchQuery = $"{songResult.Title} {songResult.Artist}";
+                var deezerTrack = await SearchDeezerTrack(searchQuery);
+
+                if (deezerTrack == null)
+                {
+                    deezerTrack = await SearchDeezerTrack(songResult.Title);
+                }
+
+                if (deezerTrack == null && !string.IsNullOrEmpty(songResult.Artist))
+                {
+                    deezerTrack = await SearchDeezerTrack(songResult.Artist);
+                }
+
+                if (deezerTrack != null)
+                {
+                    songResult.CoverArt = deezerTrack.Album?.Cover ?? string.Empty;
+                    songResult.PreviewUrl = deezerTrack.Preview ?? string.Empty;
+                    songResult.DeezerId = deezerTrack.Id.ToString();
+
+                    if (string.IsNullOrEmpty(songResult.Album))
+                    {
+                        songResult.Album = deezerTrack.Album?.Title ?? string.Empty;
+                    }
+                }
+
+                return songResult;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en Deezer para {songResult.Title}: {ex.Message}");
+                return songResult;
+            }
+        }
+
+        private async Task<DeezerTrack?> SearchDeezerTrack(string searchQuery)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(searchQuery)) return null;
+
+                string deezerUrl = $"https://api.deezer.com/search?q={Uri.EscapeDataString(searchQuery)}&limit=5";
+
+                using HttpClient client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (compatible; SongFinder/1.0)");
+
+                var response = await client.GetFromJsonAsync<DeezerResponse>(deezerUrl);
+
+                if (response?.Data != null && response.Data.Count > 0)
+                {
+                    var trackWithPreview = response.Data.FirstOrDefault(track => !string.IsNullOrEmpty(track.Preview));
+                    return trackWithPreview ?? response.Data.FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en búsqueda Deezer '{searchQuery}': {ex.Message}");
+            }
+
+            return null;
+        }
+
         private async void OnPlayPreviewClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is SongResult song)
             {
                 try
                 {
+                    // Mostrar loading en el botón
                     if (button.Parent is Grid grid)
                     {
                         var activityIndicator = grid.Children.OfType<ActivityIndicator>().FirstOrDefault();
@@ -370,6 +393,7 @@ namespace proyectomiguelangel
                         AudioPlayerFrame.IsVisible = true;
                         NowPlayingLabel.Text = $"🎵 {song.Title} - {song.Artist}";
 
+                        // Mostrar información de la letra
                         if (song.HasExactMatch)
                         {
                             LyricsMatchFrame.IsVisible = true;
@@ -382,6 +406,7 @@ namespace proyectomiguelangel
 
                         _currentPlayingSong = song;
 
+                        // Reproducir desde el tiempo estimado si hay coincidencia
                         double startTime = song.HasExactMatch ? song.EstimatedStartTime : 0;
                         await PlayAudioFromUrl(song.PreviewUrl, startTime);
                     }
@@ -398,6 +423,7 @@ namespace proyectomiguelangel
                 }
                 finally
                 {
+                    // Restaurar estado del botón
                     if (button.Parent is Grid grid)
                     {
                         var activityIndicator = grid.Children.OfType<ActivityIndicator>().FirstOrDefault();
@@ -418,6 +444,7 @@ namespace proyectomiguelangel
             {
                 StopAudio();
 
+                // Descargar el audio completo primero para mejor compatibilidad con seek
                 using var httpClient = new HttpClient();
                 var audioData = await httpClient.GetByteArrayAsync(audioUrl);
                 var stream = new MemoryStream(audioData);
@@ -428,6 +455,7 @@ namespace proyectomiguelangel
                 {
                     _audioPlayer.PlaybackEnded += OnPlaybackEnded;
 
+                    // Configurar el tiempo de inicio ANTES de reproducir
                     if (startTime > 0 && startTime < _audioPlayer.Duration)
                     {
                         _audioPlayer.Seek(startTime);
@@ -438,6 +466,7 @@ namespace proyectomiguelangel
 
                     UpdatePlaybackControls();
 
+                    // Actualizar UI inmediatamente
                     var currentTime = startTime > 0 ? startTime : 0;
                     var durationStr = TimeSpan.FromSeconds(_audioPlayer.Duration).ToString(@"mm\:ss");
                     var currentTimeStr = TimeSpan.FromSeconds(currentTime).ToString(@"mm\:ss");
@@ -446,6 +475,7 @@ namespace proyectomiguelangel
 
                     Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
 
+                    // Mensaje informativo más preciso
                     string message = $"{_currentPlayingSong.Title}\npor {_currentPlayingSong.Artist}\n\n";
                     if (startTime > 0)
                     {
@@ -544,6 +574,7 @@ namespace proyectomiguelangel
             StopButton.IsEnabled = _audioPlayer != null;
         }
 
+        // Método opcional para permitir seek manual
         private async void OnProgressBarTapped(object sender, EventArgs e)
         {
             if (_audioPlayer != null && _audioPlayer.Duration > 0)
@@ -569,13 +600,21 @@ namespace proyectomiguelangel
         }
     }
 
-    // MODELOS PARA LYRICS.OVH
-    public class LyricsOvhResponse
+    // Modelos
+    public class AuddLyricsResponse
     {
-        public string Lyrics { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public List<LyricsResult> Result { get; set; } = new List<LyricsResult>();
     }
 
-    // MODELOS PARA DEEZER
+    public class LyricsResult
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
+        public string Lyrics { get; set; } = string.Empty;
+        public string Album { get; set; } = string.Empty;
+    }
+
     public class DeezerResponse
     {
         public List<DeezerTrack> Data { get; set; } = new List<DeezerTrack>();
@@ -618,12 +657,14 @@ namespace proyectomiguelangel
         public string PreviewUrl { get; set; } = string.Empty;
         public string DeezerId { get; set; } = string.Empty;
 
-        // Propiedades para visualización
+        // Nuevas propiedades para la visualización
         public string DisplayLyrics { get; set; } = string.Empty;
-        public FormattedString FormattedLyrics { get; set; } = new FormattedString();
         public bool HasExactMatch { get; set; }
         public int LyricsMatchPosition { get; set; } = -1;
         public double EstimatedStartTime { get; set; }
+
+        // NUEVA PROPIEDAD para texto formateado con resaltado
+        public FormattedString FormattedLyrics { get; set; } = new FormattedString();
 
         // Propiedades calculadas para binding
         public string PlayButtonText => HasExactMatch ? "▶ Desde letra" : "▶ Preview";

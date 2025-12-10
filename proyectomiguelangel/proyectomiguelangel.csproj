@@ -24,18 +24,30 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+
+		<!-- Paquetes Maui esenciales -->
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-		<PackageReference Include="NAudio" Version="2.2.1" />
-		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+
+		<!-- Para FilePicker -->
+		<PackageReference Include="CommunityToolkit.Maui" Version="8.0.1" />
+
+		<!-- Para Networking/JSON -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="System.Text.Json" Version="8.0.4" />
+
+		<!-- Para audio -->
 		<PackageReference Include="Plugin.Maui.Audio" Version="3.0.0" />
+
+		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NAudio.Flac" Version="1.0.5702.29018" />
+		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<!-- Recursos Maui -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\*" />
@@ -45,19 +57,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <AndroidResource Remove="Platforms\Android\Resources\xml\network_security_config.xml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <MauiXaml Update="AudioRecognitionPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="LyricsSearchPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
-	  <MauiXaml Update="LyricsTranscriptionPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+		<MauiXaml Update="AudioRecognitionPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="LyricsSearchPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
+		<MauiXaml Update="LyricsTranscriptionPage.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 	</ItemGroup>
 
 </Project>

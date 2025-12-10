@@ -7,13 +7,13 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
+            <!-- Encabezado -->
             <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🤖 IA de Transcripción" 
                            FontSize="20" 
                            FontAttributes="Bold" 
                            HorizontalOptions="Center" />
-
                     <Label Text="Transcribe letras de canciones usando inteligencia artificial" 
                            FontSize="14" 
                            TextColor="#666"
@@ -29,23 +29,13 @@
                            FontSize="16" 
                            FontAttributes="Bold" />
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                        <Button Grid.Column="0"
-                                Text="📁 Seleccionar Archivo"
-                                Clicked="OnSelectFileClicked"
-                                BackgroundColor="#2196F3"
-                                TextColor="White"
-                                FontSize="14"
-                                HeightRequest="45" />
-
-                        <Button Grid.Column="1"
-                                Text="🎤 Grabar Audio"
-                                Clicked="OnRecordAudioClicked"
-                                BackgroundColor="#9C27B0"
-                                TextColor="White"
-                                FontSize="14"
-                                HeightRequest="45" />
-                    </Grid>
+                    <Button x:Name="SelectFileButton"
+                            Text="📁 Seleccionar Archivo"
+                            Clicked="OnSelectFileClicked"
+                            BackgroundColor="#2196F3"
+                            TextColor="White"
+                            FontSize="14"
+                            HeightRequest="45" />
 
                     <Label x:Name="SelectedFileLabel"
                            Text="Ningún archivo seleccionado"
@@ -62,34 +52,58 @@
                            FontSize="16" 
                            FontAttributes="Bold" />
 
+                    <Label Text="Idioma (importante para mejor precisión):" FontSize="14" />
                     <Picker x:Name="LanguagePicker"
-                            Title="Seleccionar idioma"
-                            FontSize="14">
+                            Title="Selecciona el idioma de la canción"
+                            FontSize="14"
+                            SelectedIndex="0">
                         <Picker.Items>
-                            <x:String>Español</x:String>
-                            <x:String>Inglés</x:String>
-                            <x:String>Francés</x:String>
-                            <x:String>Italiano</x:String>
-                            <x:String>Alemán</x:String>
+                            <x:String>Español 🇪🇸</x:String>
+                            <x:String>Inglés 🇺🇸</x:String>
+                            <x:String>Francés 🇫🇷</x:String>
+                            <x:String>Italiano 🇮🇹</x:String>
+                            <x:String>Alemán 🇩🇪</x:String>
+                            <x:String>Auto-detectar 🤖</x:String>
                         </Picker.Items>
                     </Picker>
 
-                    <CheckBox x:Name="TimestampsCheckBox"
-                              IsChecked="True" />
-                    <Label Text="Incluir marcas de tiempo"
-                           FontSize="14" />
+                    <Label Text="💡 Selecciona el idioma correcto para mejor precisión. Usa 'Auto-detectar' solo para canciones mixtas."
+                           FontSize="11"
+                           TextColor="#666"
+                           Margin="0,5,0,0" />
+
+                    <HorizontalStackLayout Spacing="10" Margin="0,10,0,0">
+                        <CheckBox x:Name="TimestampsCheckBox"
+                                  IsChecked="True"
+                                  VerticalOptions="Center" />
+                        <Label Text="Incluir marcas de tiempo"
+                               FontSize="14"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Botón de transcripción -->
-            <Button x:Name="TranscribeButton"
-                    Text="🚀 Transcribir Letra"
-                    Clicked="OnTranscribeClicked"
-                    BackgroundColor="#4CAF50"
-                    TextColor="White"
-                    FontSize="18"
-                    HeightRequest="55"
-                    HorizontalOptions="Fill" />
+            <!-- Botones de acción -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button x:Name="TranscribeButton"
+                        Grid.Column="0"
+                        Text="🚀 Transcribir"
+                        Clicked="OnTranscribeClicked"
+                        BackgroundColor="#4CAF50"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50" />
+
+                <Button x:Name="CancelButton"
+                        Grid.Column="1"
+                        Text="❌ Cancelar"
+                        Clicked="OnCancelClicked"
+                        BackgroundColor="#F44336"
+                        TextColor="White"
+                        FontSize="16"
+                        HeightRequest="50"
+                        IsVisible="False" />
+            </Grid>
 
             <!-- Progreso -->
             <Frame x:Name="ProgressFrame"
@@ -106,7 +120,7 @@
                            FontAttributes="Bold"
                            HorizontalOptions="Center" />
                     <Label x:Name="ProgressLabel"
-                           Text="0%"
+                           Text="Preparando..."
                            FontSize="14"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
@@ -124,7 +138,7 @@
                            FontAttributes="Bold" 
                            TextColor="#1B5E20" />
 
-                    <ScrollView HeightRequest="200">
+                    <ScrollView HeightRequest="300">
                         <Label x:Name="TranscribedLyricsLabel"
                                Text=""
                                FontSize="14"

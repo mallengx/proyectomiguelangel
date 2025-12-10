@@ -12,9 +12,11 @@ namespace proyectomiguelangel
         private string _recordedFilePath;
         private readonly HttpClient _httpClient;
         private bool isRecording = false;
+        private bool _hasResultShown = false; // Nueva variable para controlar si hay resultado mostrado
+        private System.Timers.Timer _recordingTimer; // Timer para el contador
+        private int _recordingSeconds = 0; // Contador de segundos
 
-   
-        private const string AudDApiToken = "cf70e3de1cba382b43363cc5cccd3e1d";
+        private const string AudDApiToken = "e191f6e3afa72a4b476998e86a7f9ba3";
 
         public AudioRecognitionPage()
         {
@@ -42,10 +44,45 @@ namespace proyectomiguelangel
             }
         }
 
+        private void StartRecordingTimer()
+        {
+            _recordingSeconds = 0;
+            _recordingTimer = new System.Timers.Timer(1000); // Actualizar cada segundo
+            _recordingTimer.Elapsed += (sender, e) =>
+            {
+                _recordingSeconds++;
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Formatear tiempo como MM:SS
+                    RecordingTimerLabel.Text = $"{_recordingSeconds / 60:00}:{_recordingSeconds % 60:00}";
+                });
+            };
+            _recordingTimer.AutoReset = true;
+            _recordingTimer.Enabled = true;
+        }
+
+        private void StopRecordingTimer()
+        {
+            if (_recordingTimer != null)
+            {
+                _recordingTimer.Stop();
+                _recordingTimer.Dispose();
+                _recordingTimer = null;
+            }
+            RecordingTimerLabel.Text = "00:00";
+        }
+
         private async void OnStartRecordingClicked(object sender, EventArgs e)
         {
             try
             {
+                // Si ya hay un resultado mostrado, ocultarlo para nueva grabación
+                if (_hasResultShown)
+                {
+                    ResultsFrame.IsVisible = false;
+                    _hasResultShown = false;
+                }
+
                 // Verificar permisos
                 var status = await Permissions.RequestAsync<Permissions.Microphone>();
                 if (status != PermissionStatus.Granted)
@@ -69,6 +106,9 @@ namespace proyectomiguelangel
 
                 // Iniciar grabación
                 StartRecording();
+
+                // Iniciar contador
+                StartRecordingTimer();
 
                 // Actualizar UI
                 UpdateRecordingUI(true);
@@ -116,6 +156,9 @@ namespace proyectomiguelangel
                 writer = null;
                 isRecording = false;
 
+                // Detener el contador
+                StopRecordingTimer();
+
                 if (e.Exception != null)
                 {
                     await DisplayAlert("Error", $"Error en grabación: {e.Exception.Message}", "OK");
@@ -139,11 +182,16 @@ namespace proyectomiguelangel
                 if (result != null && result.Status == "success" && result.Result != null)
                 {
                     ShowResult(result.Result);
+                    _hasResultShown = true; // Marcar que hay resultado mostrado
                     await DisplayAlert("Éxito", "¡Canción identificada correctamente!", "OK");
                 }
                 else
                 {
-                    ResultsFrame.IsVisible = false;
+                    // Solo ocultar resultados si no había uno mostrado previamente
+                    if (!_hasResultShown)
+                    {
+                        ResultsFrame.IsVisible = false;
+                    }
                     await DisplayAlert("No identificado",
                         "No se pudo identificar la canción. Intenta con un fragmento más claro o más largo.", "OK");
                 }
@@ -155,7 +203,10 @@ namespace proyectomiguelangel
             }
             finally
             {
-                ResetRecordingState();
+                // NO resetear completamente el estado de grabación, solo los controles
+                // para mantener los resultados visibles
+                UpdateRecordingUI(false);
+                RecordingStatusLabel.Text = "Escuchando...";
             }
         }
 
@@ -251,13 +302,17 @@ namespace proyectomiguelangel
             StartRecordingButton.IsEnabled = !isRecording;
             StopRecordingButton.IsEnabled = isRecording;
             RecordingStatusFrame.IsVisible = isRecording;
-            ResultsFrame.IsVisible = false;
+
+            // IMPORTANTE: No ocultar el ResultsFrame aquí
+            // Solo se oculta cuando iniciamos una nueva grabación
+            // ResultsFrame.IsVisible = false; // <-- COMENTADO
         }
 
         private void ResetRecordingState()
         {
             UpdateRecordingUI(false);
             RecordingStatusLabel.Text = "Escuchando...";
+            StopRecordingTimer();
         }
 
         private void CleanupAudioFile()
@@ -312,6 +367,9 @@ namespace proyectomiguelangel
 
             waveIn?.Dispose();
             writer?.Dispose();
+
+            // Detener el timer si está activo
+            StopRecordingTimer();
 
             CleanupAudioFile();
         }

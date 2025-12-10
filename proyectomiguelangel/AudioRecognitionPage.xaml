@@ -38,6 +38,15 @@
                            FontSize="16"
                            FontAttributes="Bold"
                            HorizontalOptions="Center" />
+
+                    <!-- CONTADOR DE TIEMPO AÑADIDO -->
+                    <Label x:Name="RecordingTimerLabel"
+                           Text="00:00"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="#FF5722"
+                           HorizontalOptions="Center" />
+
                     <Label Text="Reproduce la canción que quieres identificar"
                            FontSize="12"
                            TextColor="#666"
