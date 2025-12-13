@@ -103,11 +103,7 @@
                            FontSize="12"
                            TextColor="#888" />
 
-                    <Button Text="🔍 Buscar Letra"
-                            Clicked="OnSearchLyricsClicked"
-                            BackgroundColor="#2196F3"
-                            TextColor="White"
-                            FontSize="14" />
+                 
                 </VerticalStackLayout>
             </Frame>
 

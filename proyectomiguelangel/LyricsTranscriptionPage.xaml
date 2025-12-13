@@ -10,7 +10,7 @@
             <!-- Encabezado -->
             <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="🤖 IA de Transcripción" 
+                    <Label Text="Transcripción" 
                            FontSize="20" 
                            FontAttributes="Bold" 
                            HorizontalOptions="Center" />
