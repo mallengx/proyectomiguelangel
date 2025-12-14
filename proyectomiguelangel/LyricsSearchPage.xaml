@@ -39,11 +39,11 @@
             <CollectionView x:Name="ListaResultados">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame BorderColor="LightGray" CornerRadius="10" Padding="10" Margin="10,5">
-                            <Grid ColumnDefinitions="80,*" 
-                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto" 
+                        <Frame BorderColor="LightGray" CornerRadius="12" Padding="13" Margin="12,5">
+                            <Grid ColumnDefinitions="90,*" 
+                                  RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" 
                                   ColumnSpacing="10"
-                                  RowSpacing="5">
+                                  RowSpacing="8">
 
                                 <!-- Carátula -->
                                 <Image Grid.Row="0" Grid.RowSpan="5" Grid.Column="0"
@@ -86,41 +86,57 @@
                                 <Frame Grid.Row="3" Grid.Column="1"
                                        BackgroundColor="{Binding LyricsBackgroundColor}"
                                        BorderColor="{Binding LyricsBorderColor}"
-                                       Padding="8"
-                                       Margin="0,5,0,0">
+                                       Padding="12"
+                                       Margin="0,8,0,0">
                                     <Label FormattedText="{Binding FormattedLyrics}" 
                                            FontSize="11"
                                            LineBreakMode="WordWrap"
-                                           MaxLines="3" />
+                                           MaxLines="6" />
                                 </Frame>
 
-                                <!-- Botón de preview -->
-                                <Grid Grid.Row="4" Grid.Column="1" 
-                                      ColumnDefinitions="*,Auto" 
-                                      VerticalOptions="Center"
-                                      Margin="0,5,0,0">
+                                <VerticalStackLayout Grid.Row="4"
+                     Grid.Column="1"
+                     Spacing="10"
+                     Margin="0,5,0,0">
 
-                                    <Button Grid.Column="0"
-                                            Text="{Binding PlayButtonText}"
-                                            Clicked="OnPlayPreviewClicked"
-                                            BackgroundColor="{Binding PlayButtonColor}"
-                                            TextColor="White"
-                                            FontSize="11"
-                                            HeightRequest="28"
-                                            IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}"
-                                            CommandParameter="{Binding .}" />
+                                    <!-- Botón Preview -->
+                                    <Button Text="{Binding PlayButtonText}"
+            Clicked="OnPlayPreviewClicked"
+            BackgroundColor="{Binding PlayButtonColor}"
+            TextColor="White"
+            FontSize="12"
+            HeightRequest="40"
+            IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}"
+            CommandParameter="{Binding .}" />
 
-                                    <ActivityIndicator Grid.Column="1"
-                                                       IsVisible="False"
-                                                       IsRunning="False"
-                                                       Color="#2196F3" />
+                                    <!-- YouTube / Spotify DEBAJO -->
+                                    <HorizontalStackLayout Spacing="10"
+                           HorizontalOptions="Start">
 
-                                    <Label Grid.Column="0"
-                                           Text="🎵 Preview no disponible"
-                                           FontSize="11"
-                                           TextColor="Orange"
-                                           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
-                                </Grid>
+                                        <Button Text="▶ YouTube"
+                FontSize="11"
+                HeightRequest="40"
+                BackgroundColor="#FF0000"
+                TextColor="White"
+                Clicked="OnOpenYouTubeClicked"
+                CommandParameter="{Binding .}" />
+
+                                        <Button Text="🎧 Spotify"
+                FontSize="11"
+                HeightRequest="40"
+                BackgroundColor="#1DB954"
+                TextColor="White"
+                Clicked="OnOpenSpotifyClicked"
+                CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+
+                                    <!-- Preview no disponible -->
+                                    <Label Text="🎵 Preview no disponible"
+           FontSize="11"
+           TextColor="Orange"
+           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
+
+                                </VerticalStackLayout>
 
                             </Grid>
                         </Frame>

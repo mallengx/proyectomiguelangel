@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Plugin.Maui.Audio;
+using System.Net.Http.Json;
 
 #if WINDOWS
 using NAudio.Wave;
@@ -18,7 +19,11 @@ namespace proyectomiguelangel
 
         private IAudioRecorder recorder;    // Android / iOS
         private IAudioManager audioManager = AudioManager.Current;
-
+        private string _currentTitle;
+        private string _currentArtist;
+        private string _previewUrl;
+        private IAudioPlayer _audioPlayer;
+        private bool _isPreviewPlaying = false;
         private string _recordedFilePath;
         private readonly HttpClient _httpClient;
         private bool isRecording = false;
@@ -59,7 +64,27 @@ namespace proyectomiguelangel
             }
         }
 #endif
+        private async Task<(string cover, string preview)> SearchDeezerAsync(string title, string artist)
+        {
+            try
+            {
+                string query = $"{title} {artist}";
+                string url = $"https://api.deezer.com/search?q={Uri.EscapeDataString(query)}&limit=1";
 
+                using HttpClient client = new HttpClient();
+                var response = await client.GetFromJsonAsync<DeezerResponse1>(url);
+
+                var track = response?.Data?.FirstOrDefault();
+                if (track != null)
+                {
+                    return (track.Album?.CoverMedium ?? string.Empty,
+                            track.Preview ?? string.Empty);
+                }
+            }
+            catch { }
+
+            return (string.Empty, string.Empty);
+        }
         private void StartRecordingTimer()
         {
             _recordingSeconds = 0;
@@ -259,35 +284,125 @@ namespace proyectomiguelangel
             }
         }
 
-        private void ShowResult(AudDResult result)
+        private async void ShowResult(AudDResult result)
         {
             ResultsFrame.IsVisible = true;
+            _currentTitle = result.Title;
+            _currentArtist = result.Artist;
             SongTitleLabel.Text = result.Title ?? "Título no disponible";
             ArtistLabel.Text = result.Artist ?? "Artista no disponible";
             AlbumLabel.Text = result.Album ?? "Álbum no disponible";
-        }
 
+            // Buscar info en Deezer
+            var deezer = await SearchDeezerAsync(result.Title, result.Artist);
+
+            if (!string.IsNullOrEmpty(deezer.cover))
+            {
+                CoverImage.Source = ImageSource.FromUri(new Uri(deezer.cover));
+            }
+
+            _previewUrl = deezer.preview;
+            PreviewPlayButton.IsVisible = !string.IsNullOrEmpty(_previewUrl);
+            PreviewPauseButton.IsVisible = false;
+        }
         private void UpdateRecordingUI(bool isRecording)
         {
             StartRecordingButton.IsEnabled = !isRecording;
             StopRecordingButton.IsEnabled = isRecording;
             RecordingStatusFrame.IsVisible = isRecording;
         }
+        private async void OnPlayPreviewClicked(object sender, EventArgs e)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(_previewUrl))
+                    return;
 
+                // Si ya existe y está pausado → continuar
+                if (_audioPlayer != null && !_isPreviewPlaying)
+                {
+                    _audioPlayer.Play();
+                    _isPreviewPlaying = true;
+                    PreviewPauseButton.IsVisible = true;
+                    return;
+                }
+
+                // Nueva reproducción
+                _audioPlayer?.Stop();
+                _audioPlayer?.Dispose();
+
+                using var http = new HttpClient();
+                var data = await http.GetByteArrayAsync(_previewUrl);
+                var stream = new MemoryStream(data);
+
+                _audioPlayer = AudioManager.Current.CreatePlayer(stream);
+                _audioPlayer.Play();
+
+                _isPreviewPlaying = true;
+                PreviewPauseButton.IsVisible = true;
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", ex.Message, "OK");
+            }
+        }
+        private void OnPausePreviewClicked(object sender, EventArgs e)
+        {
+            if (_audioPlayer == null)
+                return;
+
+            _audioPlayer.Pause();
+            _isPreviewPlaying = false;
+        }
         private void ResetRecordingState()
         {
             UpdateRecordingUI(false);
             RecordingStatusLabel.Text = "Escuchando...";
             StopRecordingTimer();
         }
+        private async void OnOpenYouTubeClicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_currentTitle) ||
+                string.IsNullOrWhiteSpace(_currentArtist))
+                return;
 
+            var query = Uri.EscapeDataString($"{_currentTitle} {_currentArtist}");
+            var url = $"https://www.youtube.com/results?search_query={query}";
+
+            await Launcher.OpenAsync(url);
+        }
+        private async void OnOpenSpotifyClicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_currentTitle) ||
+                string.IsNullOrWhiteSpace(_currentArtist))
+                return;
+
+            var query = Uri.EscapeDataString($"{_currentTitle} {_currentArtist}");
+
+            try
+            {
+                // Intenta abrir la app de Spotify
+                await Launcher.OpenAsync($"spotify:search:{query}");
+            }
+            catch
+            {
+                // Fallback navegador
+                await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
+            }
+        }
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
+
 #if WINDOWS
-            waveIn?.Dispose();
-            writer?.Dispose();
+    waveIn?.Dispose();
+    writer?.Dispose();
 #endif
+
+            _audioPlayer?.Stop();
+            _audioPlayer?.Dispose();
+            _audioPlayer = null;
+
             StopRecordingTimer();
         }
     }
@@ -303,5 +418,25 @@ namespace proyectomiguelangel
         [JsonPropertyName("artist")] public string Artist { get; set; }
         [JsonPropertyName("title")] public string Title { get; set; }
         [JsonPropertyName("album")] public string Album { get; set; }
+    }
+    public class DeezerResponse1
+    {
+        [JsonPropertyName("data")]
+        public List<DeezerTrack1> Data { get; set; } = new();
+    }
+
+    public class DeezerTrack1
+    {
+        [JsonPropertyName("album")]
+        public DeezerAlbum1 Album { get; set; }
+
+        [JsonPropertyName("preview")]
+        public string Preview { get; set; }
+    }
+
+    public class DeezerAlbum1
+    {
+        [JsonPropertyName("cover_medium")]
+        public string CoverMedium { get; set; }
     }
 }

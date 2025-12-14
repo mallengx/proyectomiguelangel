@@ -102,8 +102,74 @@
                            Text=""
                            FontSize="12"
                            TextColor="#888" />
+                    <Grid ColumnDefinitions="100,*"
+      RowDefinitions="Auto,Auto"
+      ColumnSpacing="15"
+      Margin="0,10,0,0">
 
-                 
+                        <!-- Carátula -->
+                        <Image x:Name="CoverImage"
+           Grid.Row="0"
+           Grid.RowSpan="2"
+           Grid.Column="0"
+           HeightRequest="100"
+           WidthRequest="100"
+           Aspect="AspectFill"
+           BackgroundColor="LightGray" />
+
+                        <!-- Texto preview -->
+                        <Label Grid.Row="0"
+           Grid.Column="1"
+           Text="🎧 Preview de 30 segundos"
+           FontSize="12"
+           TextColor="#666" />
+
+                        <!-- Botón Preview -->
+                        <HorizontalStackLayout
+    Grid.Row="1"
+    Grid.Column="1"
+    Spacing="10">
+
+                            <Button x:Name="PreviewPlayButton"
+            Text="▶ Reproducir"
+            BackgroundColor="#2196F3"
+            TextColor="White"
+            FontSize="14"
+            HeightRequest="40"
+            IsVisible="False"
+            Clicked="OnPlayPreviewClicked" />
+
+                            <Button x:Name="PreviewPauseButton"
+            Text="⏸ Pausa"
+            BackgroundColor="#9E9E9E"
+            TextColor="White"
+            FontSize="14"
+            HeightRequest="40"
+            IsVisible="False"
+            Clicked="OnPausePreviewClicked" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                    <HorizontalStackLayout Spacing="15"
+                       HorizontalOptions="Center"
+                       Margin="0,10,0,0">
+
+                        <Button x:Name="YouTubeButton"
+            Text="▶ YouTube"
+            BackgroundColor="#FF0000"
+            TextColor="White"
+            FontSize="14"
+            HeightRequest="40"
+            Clicked="OnOpenYouTubeClicked" />
+
+                        <Button x:Name="SpotifyButton"
+            Text="🎧 Spotify"
+            BackgroundColor="#1DB954"
+            TextColor="White"
+            FontSize="14"
+            HeightRequest="40"
+            Clicked="OnOpenSpotifyClicked" />
+                    </HorizontalStackLayout>
+
                 </VerticalStackLayout>
             </Frame>
 

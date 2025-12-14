@@ -57,6 +57,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Raw\la_oreja_de_van_gogh___rosas_vdeo_oficial (mp3cut.net).wav" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiAsset Update="Resources\Raw\la_oreja_de_van_gogh___rosas_vdeo_oficial %28mp3cut.net%29.wav">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </MauiAsset>
+	</ItemGroup>
+
+	<ItemGroup>
 		<MauiXaml Update="AudioRecognitionPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>

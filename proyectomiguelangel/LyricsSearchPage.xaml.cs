@@ -326,6 +326,7 @@ namespace proyectomiguelangel
                     songResult.PreviewUrl = deezerTrack.Preview ?? string.Empty;
                     songResult.DeezerId = deezerTrack.Id.ToString();
 
+
                     if (string.IsNullOrEmpty(songResult.Album))
                     {
                         songResult.Album = deezerTrack.Album?.Title ?? string.Empty;
@@ -598,6 +599,21 @@ namespace proyectomiguelangel
             base.OnDisappearing();
             StopAudio();
         }
+        private async void OnOpenYouTubeClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is SongResult song)
+            {
+                await Launcher.OpenAsync(song.YouTubeUrl);
+            }
+        }
+
+        private async void OnOpenSpotifyClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is SongResult song)
+            {
+                await Launcher.OpenAsync(song.SpotifyUrl);
+            }
+        }
     }
 
     // Modelos
@@ -665,6 +681,12 @@ namespace proyectomiguelangel
 
         // NUEVA PROPIEDAD para texto formateado con resaltado
         public FormattedString FormattedLyrics { get; set; } = new FormattedString();
+        // 🎧 Enlaces externos (GENERADOS AUTOMÁTICAMENTE)
+        public string YouTubeUrl =>
+            $"https://www.youtube.com/results?search_query={Uri.EscapeDataString($"{Title} {Artist}")}";
+
+        public string SpotifyUrl =>
+            $"https://open.spotify.com/search/{Uri.EscapeDataString($"{Title} {Artist}")}";
 
         // Propiedades calculadas para binding
         public string PlayButtonText => HasExactMatch ? "▶ Desde letra" : "▶ Preview";
