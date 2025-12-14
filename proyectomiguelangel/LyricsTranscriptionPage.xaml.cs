@@ -46,10 +46,10 @@ namespace proyectomiguelangel
                 var fileTypes = new FilePickerFileType(
                     new Dictionary<DevicePlatform, IEnumerable<string>>
                     {
-                        { DevicePlatform.WinUI, new[] { ".wav", ".mp3", ".m4a", ".flac" } },
-                        { DevicePlatform.MacCatalyst, new[] { ".wav", ".mp3", ".m4a", ".flac" } },
-                        { DevicePlatform.iOS, new[] { ".wav", ".mp3", ".m4a", ".flac" } },
-                        { DevicePlatform.Android, new[] { ".wav", ".mp3", ".m4a", ".flac" } }
+                { DevicePlatform.WinUI, new[] { ".wav", ".mp3", ".m4a", ".flac" } },
+                { DevicePlatform.MacCatalyst, new[] { ".wav", ".mp3", ".m4a", ".flac" } },
+                { DevicePlatform.iOS, new[] { "public.audio" } },
+                { DevicePlatform.Android, new[] { "audio/*" } }
                     });
 
                 var result = await FilePicker.Default.PickAsync(new PickOptions
@@ -58,39 +58,51 @@ namespace proyectomiguelangel
                     FileTypes = fileTypes
                 });
 
-                if (result != null)
+                if (result == null)
+                    return;
+
+                // Nombre del archivo
+                var fileName = result.FileName;
+
+                // Ruta local accesible para la app
+                var localPath = Path.Combine(FileSystem.CacheDirectory, fileName);
+
+                // Copiar el archivo seleccionado a almacenamiento local
+                using (var inputStream = await result.OpenReadAsync())
+                using (var outputStream = File.Create(localPath))
                 {
-                    _selectedFilePath = result.FullPath;
+                    await inputStream.CopyToAsync(outputStream);
+                }
 
-                    // Mostrar información del archivo con emojis
-                    var fileName = Path.GetFileName(_selectedFilePath);
-                    SelectedFileLabel.Text = $"📁 {fileName}";
+                _selectedFilePath = localPath;
 
-                    // Intentar adivinar idioma por nombre del archivo
-                    var guessedLanguage = GuessLanguageFromFilename(fileName);
-                    if (guessedLanguage != null)
+                // UI básica
+                SelectedFileLabel.Text = $"📁 {fileName}";
+
+                // Intentar adivinar idioma por nombre del archivo
+                var guessedLanguage = GuessLanguageFromFilename(fileName);
+                if (guessedLanguage != null)
+                {
+                    SelectedFileLabel.Text += $"\n🎯 Idioma sugerido: {guessedLanguage}";
+                }
+
+                // Información del archivo (AHORA funciona en Android)
+                try
+                {
+                    var fileInfo = new FileInfo(_selectedFilePath);
+                    if (fileInfo.Exists)
                     {
-                        SelectedFileLabel.Text += $"\n🎯 Idioma sugerido: {guessedLanguage}";
-                    }
+                        var sizeMB = fileInfo.Length / 1024.0 / 1024.0;
+                        SelectedFileLabel.Text += $"\n📊 Tamaño: {sizeMB:F2} MB";
 
-                    // Mostrar información del archivo
-                    try
-                    {
-                        var fileInfo = new FileInfo(_selectedFilePath);
-                        if (fileInfo.Exists)
-                        {
-                            var sizeMB = fileInfo.Length / 1024.0 / 1024.0;
-                            SelectedFileLabel.Text += $"\n📊 Tamaño: {sizeMB:F2} MB";
-
-                            // Calcular duración aproximada (1 min ≈ 10MB para MP3, 50MB para WAV)
-                            var estimatedMinutes = sizeMB / 10; // Estimación para MP3
-                            SelectedFileLabel.Text += $"\n⏱️ Duración estimada: ~{estimatedMinutes:F1} min";
-                        }
+                        // Estimación aproximada
+                        var estimatedMinutes = sizeMB / 10; // MP3 ≈ 10MB/min
+                        SelectedFileLabel.Text += $"\n⏱️ Duración estimada: ~{estimatedMinutes:F1} min";
                     }
-                    catch
-                    {
-                        // Ignorar errores de información de archivo
-                    }
+                }
+                catch
+                {
+                    // Ignorar errores de información
                 }
             }
             catch (Exception ex)

@@ -187,7 +187,7 @@
                            FontSize="12"
                            TextColor="#666"
                            />
-                    <Label Text="• Haz clic en 'Detener' después de 10-15 segundos" 
+                    <Label Text="• Haz clic en 'Detener' después de 20-25 segundos" 
                            FontSize="12"
                            TextColor="#666"/>
                     <Label Text="• La aplicación identificará la canción automáticamente" 
