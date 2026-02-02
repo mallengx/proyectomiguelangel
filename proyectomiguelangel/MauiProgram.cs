@@ -47,9 +47,10 @@ namespace proyectomiguelangel
 
             // Registrar servicios personalizados
             builder.Services.AddSingleton<AssemblyAIService>();
-
+          //  builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
             // Configurar rutas de navegación
             builder.Services.AddTransient<LyricsTranscriptionPage>();
+
 
             return builder.Build();
         }

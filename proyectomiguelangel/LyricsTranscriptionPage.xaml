@@ -2,163 +2,290 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="proyectomiguelangel.LyricsTranscriptionPage"
-             Title="Transcribir Letras">
+             Title="TRANSCRIBIR"
+             BackgroundColor="#0F0B23">
 
     <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="20">
+        <VerticalStackLayout Padding="15" Spacing="15">
 
-            <!-- Encabezado -->
-            <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
+            <!-- Encabezado con onda de sonido -->
+            <Frame BackgroundColor="#1A173A" 
+                   Padding="20" 
+                   CornerRadius="20"
+                   BorderColor="#27AE60"
+                   HasShadow="True">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="Transcripción" 
-                           FontSize="20" 
+                    <Label Text="🤖 TRANSCRIPCIÓN IA" 
+                           FontSize="24" 
                            FontAttributes="Bold" 
-                           HorizontalOptions="Center" />
-                    <Label Text="Transcribe letras de canciones usando inteligencia artificial" 
+                           TextColor="#FFFFFF"
+                           HorizontalOptions="Center" 
+                           FontFamily="Bold"/>
+
+                    <!-- Onda de sonido visual -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="3">
+                        <BoxView Color="#27AE60" WidthRequest="4" HeightRequest="20" CornerRadius="2"/>
+                        <BoxView Color="#2ECC71" WidthRequest="4" HeightRequest="30" CornerRadius="2"/>
+                        <BoxView Color="#1ABC9C" WidthRequest="4" HeightRequest="40" CornerRadius="2"/>
+                        <BoxView Color="#27AE60" WidthRequest="4" HeightRequest="30" CornerRadius="2"/>
+                        <BoxView Color="#2ECC71" WidthRequest="4" HeightRequest="20" CornerRadius="2"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="Convierte audio en letras con inteligencia artificial" 
                            FontSize="14" 
-                           TextColor="#666"
+                           TextColor="#BBBBBB"
                            HorizontalOptions="Center"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Selección de audio -->
-            <Frame BackgroundColor="#F5F5F5" Padding="15" CornerRadius="10">
-                <VerticalStackLayout Spacing="15">
-                    <Label Text="Selecciona el audio a transcribir:" 
-                           FontSize="16" 
-                           FontAttributes="Bold" />
+            <!-- Selección de audio con estilo vinilo -->
+            <Frame BackgroundColor="Transparent" 
+                   Padding="0"
+                   CornerRadius="15"
+                   HasShadow="False">
+                <Grid>
+                    <!-- Disco de vinilo animado -->
+                    <Ellipse WidthRequest="100" 
+                            HeightRequest="100"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                        <Ellipse.Fill>
+                            <RadialGradientBrush>
+                                <GradientStop Color="#2C3E50" Offset="0"/>
+                                <GradientStop Color="#1A173A" Offset="1"/>
+                            </RadialGradientBrush>
+                        </Ellipse.Fill>
+                    </Ellipse>
 
-                    <Button x:Name="SelectFileButton"
-                            Text="📁 Seleccionar Archivo"
-                            Clicked="OnSelectFileClicked"
-                            BackgroundColor="#2196F3"
-                            TextColor="White"
-                            FontSize="14"
-                            HeightRequest="45" />
+                    <VerticalStackLayout Padding="20" Spacing="15">
+                        <Label Text="🎧 SELECCIONA AUDIO" 
+                               FontSize="18" 
+                               FontAttributes="Bold" 
+                               TextColor="#FFFFFF"/>
 
-                    <Label x:Name="SelectedFileLabel"
-                           Text="Ningún archivo seleccionado"
-                           FontSize="12"
-                           TextColor="#666"
-                           HorizontalOptions="Center" />
-                </VerticalStackLayout>
+                        <Button x:Name="SelectFileButton"
+                                Text="📀 ABRIR ARCHIVO DE AUDIO"
+                                Clicked="OnSelectFileClicked"
+                                BackgroundColor="#27AE60"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="55"
+                                CornerRadius="10"
+                                Margin="0,10,0,0"/>
+
+                        <Label x:Name="SelectedFileLabel"
+                               Text="Ningún archivo seleccionado"
+                               FontSize="12"
+                               TextColor="#BBBBBB"
+                               HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
             </Frame>
 
-            <!-- Configuración -->
-            <Frame BackgroundColor="#FFF3E0" Padding="15" CornerRadius="10">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="Configuración de transcripción:" 
-                           FontSize="16" 
-                           FontAttributes="Bold" />
+            <!-- Configuración estilo mesa de mezclas -->
+            <Frame BackgroundColor="#1A173A" 
+                   Padding="20" 
+                   CornerRadius="15"
+                   BorderColor="#3498DB">
+                <VerticalStackLayout Spacing="15">
+                    <Label Text="🎚️ CONFIGURACIÓN" 
+                           FontSize="18" 
+                           FontAttributes="Bold" 
+                           TextColor="#FFFFFF" />
 
-                    <Label Text="Idioma (importante para mejor precisión):" FontSize="14" />
-                    <Picker x:Name="LanguagePicker"
-                            Title="Selecciona el idioma de la canción"
-                            FontSize="14"
-                            SelectedIndex="0">
-                        <Picker.Items>
-                            <x:String>Español 🇪🇸</x:String>
-                            <x:String>Inglés 🇺🇸</x:String>
-                            <x:String>Francés 🇫🇷</x:String>
-                            <x:String>Italiano 🇮🇹</x:String>
-                            <x:String>Alemán 🇩🇪</x:String>
-                            <x:String>Auto-detectar 🤖</x:String>
-                        </Picker.Items>
-                    </Picker>
+                    <Frame BackgroundColor="#2C3E50" Padding="10" CornerRadius="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🌍 IDIOMA:" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold"
+                                   TextColor="#FFFFFF"/>
 
-                    <Label Text="💡 Selecciona el idioma correcto para mejor precisión. Usa 'Auto-detectar' solo para canciones mixtas."
-                           FontSize="11"
-                           TextColor="#666"
-                           Margin="0,5,0,0" />
+                            <Picker x:Name="LanguagePicker"
+                                    Title="Selecciona idioma"
+                                    FontSize="14"
+                                    TextColor="#FFFFFF"
+                                    BackgroundColor="#34495E"
+                                    SelectedIndex="0">
+                                <Picker.Items>
+                                    <x:String>🇪🇸 Español</x:String>
+                                    <x:String>🇺🇸 Inglés</x:String>
+                                    <x:String>🇫🇷 Francés</x:String>
+                                    <x:String>🇮🇹 Italiano</x:String>
+                                    <x:String>🇩🇪 Alemán</x:String>
+                                    <x:String>🤖 Auto-detectar</x:String>
+                                </Picker.Items>
+                            </Picker>
+                        </VerticalStackLayout>
+                    </Frame>
 
-                    <HorizontalStackLayout Spacing="10" Margin="0,10,0,0">
-                        <CheckBox x:Name="TimestampsCheckBox"
-                                  IsChecked="True"
-                                  VerticalOptions="Center" />
-                        <Label Text="Incluir marcas de tiempo"
-                               FontSize="14"
-                               VerticalOptions="Center" />
+                    <!-- Slider para precisión (simulado) -->
+                    <Frame BackgroundColor="#2C3E50" Padding="10" CornerRadius="10">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="🎯 PRECISIÓN:" 
+                                   FontSize="14" 
+                                   FontAttributes="Bold"
+                                   TextColor="#FFFFFF"/>
+                            <Slider Minimum="0" Maximum="100" Value="85"
+                                    ThumbColor="#27AE60"
+                                    MinimumTrackColor="#27AE60"
+                                    MaximumTrackColor="#34495E"/>
+                        </VerticalStackLayout>
+                    </Frame>
+
+                    <!-- Opciones adicionales -->
+                    <HorizontalStackLayout Spacing="15">
+                        <Frame BackgroundColor="#2C3E50" 
+                               Padding="15" 
+                               CornerRadius="10"
+                               WidthRequest="120">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <CheckBox x:Name="TimestampsCheckBox"
+                                          IsChecked="True"
+                                          Color="#27AE60"
+                                          VerticalOptions="Center" />
+                                <Label Text="⏱️ Tiempos"
+                                       FontSize="12"
+                                       TextColor="#BBBBBB"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
+
+                        <Frame BackgroundColor="#2C3E50" 
+                               Padding="15" 
+                               CornerRadius="10"
+                               WidthRequest="120">
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <CheckBox x:Name="FormatCheckBox"
+                                          IsChecked="True"
+                                          Color="#3498DB"
+                                          VerticalOptions="Center" />
+                                <Label Text="📝 Formatear"
+                                       FontSize="12"
+                                       TextColor="#BBBBBB"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+                        </Frame>
                     </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Botones de acción -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+            <!-- Botones de acción estilo botones de estudio -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                 <Button x:Name="TranscribeButton"
                         Grid.Column="0"
-                        Text="🚀 Transcribir"
+                        Text="🎶 TRANSCRIBIR"
                         Clicked="OnTranscribeClicked"
-                        BackgroundColor="#4CAF50"
+                        BackgroundColor="#27AE60"
                         TextColor="White"
                         FontSize="16"
-                        HeightRequest="50" />
+                        FontAttributes="Bold"
+                        HeightRequest="55"
+                        CornerRadius="10"/>
 
                 <Button x:Name="CancelButton"
                         Grid.Column="1"
-                        Text="❌ Cancelar"
+                        Text="⏹️ CANCELAR"
                         Clicked="OnCancelClicked"
-                        BackgroundColor="#F44336"
+                        BackgroundColor="#E74C3C"
                         TextColor="White"
                         FontSize="16"
-                        HeightRequest="50"
+                        FontAttributes="Bold"
+                        HeightRequest="55"
+                        CornerRadius="10"
                         IsVisible="False" />
             </Grid>
 
-            <!-- Progreso -->
+            <!-- Progreso con animación de ecualizador -->
             <Frame x:Name="ProgressFrame"
                    IsVisible="False"
-                   BackgroundColor="#E8F5E8"
-                   Padding="15"
-                   CornerRadius="10">
-                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
-                    <ActivityIndicator x:Name="TranscriptionIndicator"
-                                      IsRunning="True"
-                                      Color="#4CAF50" />
-                    <Label Text="Transcribiendo audio..."
+                   BackgroundColor="#1A173A"
+                   Padding="20"
+                   CornerRadius="15"
+                   BorderColor="#27AE60">
+                <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                    <!-- Ecualizador animado -->
+                    <HorizontalStackLayout Spacing="3" HorizontalOptions="Center">
+                        <BoxView x:Name="Bar1" Color="#27AE60" WidthRequest="5" HeightRequest="10" CornerRadius="2"/>
+                        <BoxView x:Name="Bar2" Color="#2ECC71" WidthRequest="5" HeightRequest="20" CornerRadius="2"/>
+                        <BoxView x:Name="Bar3" Color="#1ABC9C" WidthRequest="5" HeightRequest="30" CornerRadius="2"/>
+                        <BoxView x:Name="Bar4" Color="#3498DB" WidthRequest="5" HeightRequest="20" CornerRadius="2"/>
+                        <BoxView x:Name="Bar5" Color="#27AE60" WidthRequest="5" HeightRequest="10" CornerRadius="2"/>
+                    </HorizontalStackLayout>
+
+                    <Label Text="PROCESANDO AUDIO..."
                            FontSize="16"
                            FontAttributes="Bold"
+                           TextColor="#FFFFFF"
                            HorizontalOptions="Center" />
                     <Label x:Name="ProgressLabel"
-                           Text="Preparando..."
+                           Text="Analizando frecuencias..."
                            FontSize="14"
+                           TextColor="#BBBBBB"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Frame>
 
-            <!-- Resultados -->
+            <!-- Resultados con diseño de partitura -->
             <Frame x:Name="ResultsFrame"
                    IsVisible="False"
-                   BackgroundColor="#E8F5E8"
-                   Padding="15"
-                   CornerRadius="10">
-                <VerticalStackLayout Spacing="10">
-                    <Label Text="📝 Letra Transcrita" 
-                           FontSize="18" 
-                           FontAttributes="Bold" 
-                           TextColor="#1B5E20" />
+                   BackgroundColor="#1A173A"
+                   Padding="0"
+                   CornerRadius="15"
+                   BorderColor="#9B59B6">
+                <VerticalStackLayout Spacing="0">
+                    <!-- Cabecera de partitura -->
+                    <Grid BackgroundColor="#2C3E50" 
+                          HeightRequest="50"
+                          Padding="15">
+                        <Label Text="🎼 LETRA TRANSCRITA" 
+                               FontSize="18" 
+                               FontAttributes="Bold" 
+                               TextColor="#FFFFFF"
+                               VerticalOptions="Center"/>
 
-                    <ScrollView HeightRequest="300">
+                        <!-- Icono musical -->
+                        <HorizontalStackLayout HorizontalOptions="End" Spacing="2">
+                            <Label Text="♪" FontSize="20" TextColor="#9B59B6"/>
+                            <Label Text="♫" FontSize="20" TextColor="#9B59B6"/>
+                            <Label Text="♩" FontSize="20" TextColor="#9B59B6"/>
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- Área de texto -->
+                    <ScrollView HeightRequest="300" Padding="15">
                         <Label x:Name="TranscribedLyricsLabel"
                                Text=""
                                FontSize="14"
+                               TextColor="#FFFFFF"
                                LineBreakMode="WordWrap" />
                     </ScrollView>
 
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                    <!-- Botones inferiores -->
+                    <Grid ColumnDefinitions="*,*" 
+                          ColumnSpacing="10"
+                          Padding="15"
+                          BackgroundColor="#2C3E50">
                         <Button Grid.Column="0"
-                                Text="📋 Copiar"
+                                Text="📋 COPIAR"
                                 Clicked="OnCopyLyricsClicked"
-                                BackgroundColor="#2196F3"
+                                BackgroundColor="#3498DB"
                                 TextColor="White"
-                                FontSize="14" />
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="45"
+                                CornerRadius="8" />
 
                         <Button Grid.Column="1"
-                                Text="💾 Guardar"
+                                Text="💾 GUARDAR"
                                 Clicked="OnSaveLyricsClicked"
-                                BackgroundColor="#FF9800"
+                                BackgroundColor="#9B59B6"
                                 TextColor="White"
-                                FontSize="14" />
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HeightRequest="45"
+                                CornerRadius="8" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>

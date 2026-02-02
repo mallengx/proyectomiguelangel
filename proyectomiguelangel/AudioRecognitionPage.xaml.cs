@@ -3,7 +3,8 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Plugin.Maui.Audio;
 using System.Net.Http.Json;
-
+using proyectomiguelangel.Services; 
+using proyectomiguelangel.Models;
 #if WINDOWS
 using NAudio.Wave;
 #endif
@@ -32,7 +33,7 @@ namespace proyectomiguelangel
         private System.Timers.Timer _recordingTimer;
         private int _recordingSeconds = 0;
 
-        private const string AudDApiToken = "e191f6e3afa72a4b476998e86a7f9ba3";
+        private const string AudDApiToken = "86da83c67c096f77c2dd8706694f805a";
 
         public AudioRecognitionPage()
         {
@@ -304,6 +305,39 @@ namespace proyectomiguelangel
             _previewUrl = deezer.preview;
             PreviewPlayButton.IsVisible = !string.IsNullOrEmpty(_previewUrl);
             PreviewPauseButton.IsVisible = false;
+
+            // GUARDAR EN HISTORIAL
+            await SaveToHistory(result, deezer.cover, deezer.preview, "AudioRecognition");
+        }
+
+        private async Task SaveToHistory(AudDResult result, string coverUrl, string previewUrl, string source)
+        {
+            try
+            {
+                var historyItem = new SongHistory
+                {
+                    Title = result.Title,
+                    Artist = result.Artist,
+                    Album = result.Album,
+                    CoverUrl = coverUrl,
+                    PreviewUrl = previewUrl,
+                    DetectedDate = DateTime.Now,
+                    Source = source,
+                    SearchQuery = "" // Vacío para AudioRecognition
+                };
+
+                var databaseService = new DatabaseService();
+                await databaseService.InitializeAsync();
+                await databaseService.SaveSongAsync(historyItem);
+
+                // Notificación opcional
+                await DisplayAlert("✅ Guardado",
+                    $"{result.Title} se ha guardado en el historial", "OK");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error guardando en historial: {ex.Message}");
+            }
         }
         private void UpdateRecordingUI(bool isRecording)
         {

@@ -3,16 +3,22 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
             xmlns:local="clr-namespace:proyectomiguelangel"
             x:Class="proyectomiguelangel.MainPage"
-            Title="Song Finder 🎵">
+            Title="Song Finder 🎵"
+            BarBackground="#1A173A"
+            BarTextColor="#27AE60"
+            SelectedTabColor="#27AE60"
+            UnselectedTabColor="#BBBBBB">
 
     <TabbedPage.Children>
         <!-- Pestaña 1: Buscador de Letras -->
-        <local:LyricsSearchPage Title="🔍 Buscar Letras" />
+        <local:LyricsSearchPage Title="🔍 Letras" />
 
         <!-- Pestaña 2: Shazam-like -->
-        <local:AudioRecognitionPage Title="🎤 Identificar Canción" />
+        <local:AudioRecognitionPage Title="🎤 Identificar" />
 
         <!-- Pestaña 3: IA Transcripción -->
-        <local:LyricsTranscriptionPage Title="📝 Transcribir Letras" />
+        <local:LyricsTranscriptionPage Title="📝 Transcribir" />
+
+        <local:SongHistoryPage Title="📜 Historial" />
     </TabbedPage.Children>
 </TabbedPage>

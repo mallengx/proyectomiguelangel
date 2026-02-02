@@ -2,22 +2,26 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="proyectomiguelangel.AudioRecognitionPage"
-             Title="Identificar Canción">
+             Title="Identificar Canción"
+             BackgroundColor="#0F0B23">
 
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
-            <Frame BackgroundColor="#E3F2FD" Padding="15" CornerRadius="10">
+            <Frame BackgroundColor="#1A173A" 
+                   Padding="15" 
+                   CornerRadius="15"
+                   BorderColor="#9B59B6">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🎤 Identificador de Canciones" 
-                           TextColor="#666"
+                           TextColor="#FFFFFF"
                            FontSize="20" 
                            FontAttributes="Bold" 
                            HorizontalOptions="Center" />
 
-                    <Label Text="Graba un fragmento de audio para identificar la canción (como Shazam)" 
+                    <Label Text="Graba un fragmento de audio para identificar la canción" 
                            FontSize="14" 
-                           TextColor="#666"
+                           TextColor="#BBBBBB"
                            HorizontalOptions="Center"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
@@ -26,30 +30,32 @@
             <!-- Estado de grabación -->
             <Frame x:Name="RecordingStatusFrame"
                    IsVisible="False"
-                   BackgroundColor="#FFF3E0"
+                   BackgroundColor="#2C3E50"
                    Padding="15"
-                   CornerRadius="10">
+                   CornerRadius="15"
+                   BorderColor="#27AE60">
                 <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
                     <ActivityIndicator x:Name="RecordingIndicator"
                                       IsRunning="True"
-                                      Color="#FF9800" />
+                                      Color="#27AE60" />
                     <Label x:Name="RecordingStatusLabel"
                            Text="Escuchando..."
                            FontSize="16"
                            FontAttributes="Bold"
+                           TextColor="#FFFFFF"
                            HorizontalOptions="Center" />
 
-                    <!-- CONTADOR DE TIEMPO AÑADIDO -->
+                    <!-- CONTADOR DE TIEMPO -->
                     <Label x:Name="RecordingTimerLabel"
                            Text="00:00"
                            FontSize="24"
                            FontAttributes="Bold"
-                           TextColor="#FF5722"
+                           TextColor="#27AE60"
                            HorizontalOptions="Center" />
 
                     <Label Text="Reproduce la canción que quieres identificar"
                            FontSize="12"
-                           TextColor="#666"
+                           TextColor="#BBBBBB"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Frame>
@@ -60,139 +66,153 @@
                         Grid.Column="0"
                         Text="🎤 Iniciar Grabación"
                         Clicked="OnStartRecordingClicked"
-                        BackgroundColor="#4CAF50"
+                        BackgroundColor="#27AE60"
                         TextColor="White"
                         FontSize="16"
-                        HeightRequest="50" />
+                        FontAttributes="Bold"
+                        HeightRequest="50"
+                        CornerRadius="10" />
 
                 <Button x:Name="StopRecordingButton"
                         Grid.Column="1"
                         Text="⏹️ Detener"
                         Clicked="OnStopRecordingClicked"
-                        BackgroundColor="#F44336"
+                        BackgroundColor="#E74C3C"
                         TextColor="White"
                         FontSize="16"
+                        FontAttributes="Bold"
                         HeightRequest="50"
+                        CornerRadius="10"
                         IsEnabled="False" />
             </Grid>
 
             <!-- Resultados -->
             <Frame x:Name="ResultsFrame"
                    IsVisible="False"
-                   BackgroundColor="#E8F5E8"
+                   BackgroundColor="#1A173A"
                    Padding="15"
-                   CornerRadius="10">
+                   CornerRadius="15"
+                   BorderColor="#3498DB">
                 <VerticalStackLayout Spacing="10">
                     <Label Text="🎵 Canción Identificada" 
                            FontSize="18" 
                            FontAttributes="Bold" 
-                           TextColor="#1B5E20" />
+                           TextColor="#FFFFFF" />
 
                     <Label x:Name="SongTitleLabel"
                            Text=""
                            FontSize="16"
-                           FontAttributes="Bold" />
+                           FontAttributes="Bold"
+                           TextColor="#FFFFFF" />
 
                     <Label x:Name="ArtistLabel"
                            Text=""
                            FontSize="14"
-                           TextColor="#666" />
+                           TextColor="#3498DB" />
 
                     <Label x:Name="AlbumLabel"
                            Text=""
                            FontSize="12"
-                           TextColor="#888" />
+                           TextColor="#BBBBBB" />
+
                     <Grid ColumnDefinitions="100,*"
-      RowDefinitions="Auto,Auto"
-      ColumnSpacing="15"
-      Margin="0,10,0,0">
+                          RowDefinitions="Auto,Auto"
+                          ColumnSpacing="15"
+                          Margin="0,10,0,0">
 
                         <!-- Carátula -->
                         <Image x:Name="CoverImage"
-           Grid.Row="0"
-           Grid.RowSpan="2"
-           Grid.Column="0"
-           HeightRequest="100"
-           WidthRequest="100"
-           Aspect="AspectFill"
-           BackgroundColor="LightGray" />
+                               Grid.Row="0"
+                               Grid.RowSpan="2"
+                               Grid.Column="0"
+                               HeightRequest="100"
+                               WidthRequest="100"
+                               Aspect="AspectFill"
+                               BackgroundColor="#2C3E50" />
 
                         <!-- Texto preview -->
                         <Label Grid.Row="0"
-           Grid.Column="1"
-           Text="🎧 Preview de 30 segundos"
-           FontSize="12"
-           TextColor="#666" />
+                               Grid.Column="1"
+                               Text="🎧 Preview de 30 segundos"
+                               FontSize="12"
+                               TextColor="#BBBBBB" />
 
                         <!-- Botón Preview -->
                         <HorizontalStackLayout
-    Grid.Row="1"
-    Grid.Column="1"
-    Spacing="10">
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Spacing="10">
 
                             <Button x:Name="PreviewPlayButton"
-            Text="▶ Reproducir"
-            BackgroundColor="#2196F3"
-            TextColor="White"
-            FontSize="14"
-            HeightRequest="40"
-            IsVisible="False"
-            Clicked="OnPlayPreviewClicked" />
+                                    Text="▶ Reproducir"
+                                    BackgroundColor="#27AE60"
+                                    TextColor="White"
+                                    FontSize="14"
+                                    HeightRequest="40"
+                                    CornerRadius="8"
+                                    IsVisible="False"
+                                    Clicked="OnPlayPreviewClicked" />
 
                             <Button x:Name="PreviewPauseButton"
-            Text="⏸ Pausa"
-            BackgroundColor="#9E9E9E"
-            TextColor="White"
-            FontSize="14"
-            HeightRequest="40"
-            IsVisible="False"
-            Clicked="OnPausePreviewClicked" />
+                                    Text="⏸ Pausa"
+                                    BackgroundColor="#3498DB"
+                                    TextColor="White"
+                                    FontSize="14"
+                                    HeightRequest="40"
+                                    CornerRadius="8"
+                                    IsVisible="False"
+                                    Clicked="OnPausePreviewClicked" />
                         </HorizontalStackLayout>
                     </Grid>
+
                     <HorizontalStackLayout Spacing="15"
-                       HorizontalOptions="Center"
-                       Margin="0,10,0,0">
+                                           HorizontalOptions="Center"
+                                           Margin="0,10,0,0">
 
                         <Button x:Name="YouTubeButton"
-            Text="▶ YouTube"
-            BackgroundColor="#FF0000"
-            TextColor="White"
-            FontSize="14"
-            HeightRequest="40"
-            Clicked="OnOpenYouTubeClicked" />
+                                Text="▶ YouTube"
+                                BackgroundColor="#FF0000"
+                                TextColor="White"
+                                FontSize="14"
+                                HeightRequest="40"
+                                CornerRadius="8"
+                                Clicked="OnOpenYouTubeClicked" />
 
                         <Button x:Name="SpotifyButton"
-            Text="🎧 Spotify"
-            BackgroundColor="#1DB954"
-            TextColor="White"
-            FontSize="14"
-            HeightRequest="40"
-            Clicked="OnOpenSpotifyClicked" />
+                                Text="🎧 Spotify"
+                                BackgroundColor="#1DB954"
+                                TextColor="White"
+                                FontSize="14"
+                                HeightRequest="40"
+                                CornerRadius="8"
+                                Clicked="OnOpenSpotifyClicked" />
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>
             </Frame>
 
             <!-- Información -->
-            <Frame BackgroundColor="#F5F5F5" Padding="15" CornerRadius="10">
+            <Frame BackgroundColor="#1A173A" 
+                   Padding="15" 
+                   CornerRadius="15"
+                   BorderColor="#F39C12">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="💡 Cómo usar:" 
                            FontSize="16" 
                            FontAttributes="Bold"
-                           TextColor="#666"/>
+                           TextColor="#F39C12"/>
                     <Label Text="• Haz clic en 'Iniciar Grabación'" 
                            FontSize="12" 
-                           TextColor="#666"/>
+                           TextColor="#BBBBBB"/>
                     <Label Text="• Reproduce la canción que quieres identificar" 
                            FontSize="12"
-                           TextColor="#666"
-                           />
+                           TextColor="#BBBBBB"/>
                     <Label Text="• Haz clic en 'Detener' después de 20-25 segundos" 
                            FontSize="12"
-                           TextColor="#666"/>
+                           TextColor="#BBBBBB"/>
                     <Label Text="• La aplicación identificará la canción automáticamente" 
                            FontSize="12" 
-                           TextColor="#666"/>
+                           TextColor="#BBBBBB"/>
                 </VerticalStackLayout>
             </Frame>
 

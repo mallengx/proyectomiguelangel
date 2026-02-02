@@ -5,7 +5,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Plugin.Maui.Audio;
-
+using proyectomiguelangel.Services;
+using proyectomiguelangel.Models;
 namespace proyectomiguelangel
 {
     public partial class LyricsSearchPage : ContentPage
@@ -36,7 +37,7 @@ namespace proyectomiguelangel
 
             try
             {
-                string apiKey = "e191f6e3afa72a4b476998e86a7f9ba3";
+                string apiKey = "86da83c67c096f77c2dd8706694f805a";
                 string url = $"https://api.audd.io/findLyrics/?q={Uri.EscapeDataString(_searchText)}&api_token={apiKey}";
 
                 using HttpClient client = new HttpClient();
@@ -71,6 +72,18 @@ namespace proyectomiguelangel
                     int previewsFound = processedResults.Count(r => !string.IsNullOrEmpty(r.PreviewUrl));
                     int exactMatches = processedResults.Count(r => r.HasExactMatch);
 
+                    // ============ NUEVO: GUARDAR EN HISTORIAL ============
+                    try
+                    {
+                        await SaveSearchResultsToHistory(processedResults, _searchText);
+                    }
+                    catch (Exception histEx)
+                    {
+                        // No mostrar error al usuario, solo log
+                        System.Diagnostics.Debug.WriteLine($"Error guardando en historial: {histEx.Message}");
+                    }
+                    // ====================================================
+
                     await DisplayAlert("Búsqueda completada",
                         $"Se encontraron {processedResults.Count} canciones\n" +
                         $"Previews disponibles: {previewsFound}\n" +
@@ -94,6 +107,35 @@ namespace proyectomiguelangel
             }
         }
 
+        private async Task SaveSearchResultsToHistory(List<SongResult> results, string searchQuery)
+        {
+            try
+            {
+                var databaseService = new DatabaseService();
+                await databaseService.InitializeAsync();
+
+                foreach (var song in results.Where(r => !string.IsNullOrEmpty(r.Title)))
+                {
+                    var historyItem = new SongHistory
+                    {
+                        Title = song.Title,
+                        Artist = song.Artist,
+                        Album = song.Album,
+                        CoverUrl = song.CoverArt,
+                        PreviewUrl = song.PreviewUrl,
+                        DetectedDate = DateTime.Now,
+                        Source = "LyricsSearch",
+                        SearchQuery = searchQuery
+                    };
+
+                    await databaseService.SaveSongAsync(historyItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error guardando búsqueda en historial: {ex.Message}");
+            }
+        }
         // NUEVO MÉTODO: Procesar letra para mostrar
         private void ProcessLyricsForDisplay(SongResult songResult, string searchText)
         {

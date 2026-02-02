@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:converters="clr-namespace:proyectomiguelangel.Converters"
              x:Class="proyectomiguelangel.LyricsSearchPage"
-             Title="Buscar Letras">
+             Title="Buscar Letras"
+             BackgroundColor="#0F0B23">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -16,12 +17,21 @@
         <VerticalStackLayout Grid.Row="0" Padding="20" Spacing="15">
             <Entry x:Name="txtBusqueda"
                    Placeholder="Escribe parte de la letra..."
-                   FontSize="18" />
+                   PlaceholderColor="#BBBBBB"
+                   TextColor="#FFFFFF"
+                   FontSize="18"
+                   BackgroundColor="#1A173A"
+                   HeightRequest="50"
+                   ClearButtonVisibility="WhileEditing"/>
 
-            <Button Text="Buscar canción"
+            <Button Text="Buscar canción 🎵"
                     Clicked="OnBuscarClicked"
-                    BackgroundColor="#2196F3"
-                    TextColor="White" />
+                    BackgroundColor="#27AE60"
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HeightRequest="50"
+                    CornerRadius="10" />
         </VerticalStackLayout>
 
         <!-- Fila 1: Loading Indicator -->
@@ -29,7 +39,7 @@
                            x:Name="LoadingIndicator"
                            IsVisible="False"
                            IsRunning="False"
-                           Color="#2196F3"
+                           Color="#27AE60"
                            HeightRequest="30"
                            HorizontalOptions="Center"
                            Margin="0,0,0,10" />
@@ -39,7 +49,12 @@
             <CollectionView x:Name="ListaResultados">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Frame BorderColor="LightGray" CornerRadius="12" Padding="13" Margin="12,5">
+                        <Frame BorderColor="#27AE60" 
+                               CornerRadius="15" 
+                               Padding="13" 
+                               Margin="12,5"
+                               BackgroundColor="#1A173A"
+                               HasShadow="True">
                             <Grid ColumnDefinitions="90,*" 
                                   RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" 
                                   ColumnSpacing="10"
@@ -48,7 +63,7 @@
                                 <!-- Carátula -->
                                 <Image Grid.Row="0" Grid.RowSpan="5" Grid.Column="0"
                                        Aspect="AspectFill"
-                                       BackgroundColor="LightGray"
+                                       BackgroundColor="#2C3E50"
                                        HeightRequest="80">
                                     <Image.Source>
                                         <UriImageSource Uri="{Binding CoverArt}" 
@@ -68,73 +83,78 @@
                                        Text="{Binding Title}" 
                                        FontAttributes="Bold" 
                                        FontSize="16" 
+                                       TextColor="#FFFFFF"
                                        LineBreakMode="TailTruncation" />
 
                                 <Label Grid.Row="1" Grid.Column="1" 
                                        Text="{Binding Artist}" 
                                        FontSize="14" 
-                                       TextColor="Gray"
+                                       TextColor="#3498DB"
                                        LineBreakMode="TailTruncation" />
 
                                 <Label Grid.Row="2" Grid.Column="1" 
                                        Text="{Binding Album}" 
                                        FontSize="12" 
-                                       TextColor="DarkGray"
+                                       TextColor="#BBBBBB"
                                        LineBreakMode="TailTruncation" />
 
-                                <!-- LETRA - SOLO UNA VERSIÓN (ACTUALIZADO) -->
+                                <!-- LETRA - SOLO UNA VERSIÓN -->
                                 <Frame Grid.Row="3" Grid.Column="1"
-                                       BackgroundColor="{Binding LyricsBackgroundColor}"
-                                       BorderColor="{Binding LyricsBorderColor}"
+                                       BackgroundColor="#2C3E50"
+                                       BorderColor="#27AE60"
                                        Padding="12"
                                        Margin="0,8,0,0">
                                     <Label FormattedText="{Binding FormattedLyrics}" 
                                            FontSize="11"
+                                           TextColor="#FFFFFF"
                                            LineBreakMode="WordWrap"
                                            MaxLines="6" />
                                 </Frame>
 
                                 <VerticalStackLayout Grid.Row="4"
-                     Grid.Column="1"
-                     Spacing="10"
-                     Margin="0,5,0,0">
+                                                     Grid.Column="1"
+                                                     Spacing="10"
+                                                     Margin="0,5,0,0">
 
                                     <!-- Botón Preview -->
                                     <Button Text="{Binding PlayButtonText}"
-            Clicked="OnPlayPreviewClicked"
-            BackgroundColor="{Binding PlayButtonColor}"
-            TextColor="White"
-            FontSize="12"
-            HeightRequest="40"
-            IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}"
-            CommandParameter="{Binding .}" />
+                                            Clicked="OnPlayPreviewClicked"
+                                            BackgroundColor="{Binding PlayButtonColor}"
+                                            TextColor="White"
+                                            FontSize="12"
+                                            HeightRequest="40"
+                                            CornerRadius="8"
+                                            IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}"
+                                            CommandParameter="{Binding .}" />
 
-                                    <!-- YouTube / Spotify DEBAJO -->
+                                    <!-- YouTube / Spotify -->
                                     <HorizontalStackLayout Spacing="10"
-                           HorizontalOptions="Start">
+                                                           HorizontalOptions="Start">
 
                                         <Button Text="▶ YouTube"
-                FontSize="11"
-                HeightRequest="40"
-                BackgroundColor="#FF0000"
-                TextColor="White"
-                Clicked="OnOpenYouTubeClicked"
-                CommandParameter="{Binding .}" />
+                                                FontSize="11"
+                                                HeightRequest="40"
+                                                BackgroundColor="#FF0000"
+                                                TextColor="White"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenYouTubeClicked"
+                                                CommandParameter="{Binding .}" />
 
                                         <Button Text="🎧 Spotify"
-                FontSize="11"
-                HeightRequest="40"
-                BackgroundColor="#1DB954"
-                TextColor="White"
-                Clicked="OnOpenSpotifyClicked"
-                CommandParameter="{Binding .}" />
+                                                FontSize="11"
+                                                HeightRequest="40"
+                                                BackgroundColor="#1DB954"
+                                                TextColor="White"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenSpotifyClicked"
+                                                CommandParameter="{Binding .}" />
                                     </HorizontalStackLayout>
 
                                     <!-- Preview no disponible -->
                                     <Label Text="🎵 Preview no disponible"
-           FontSize="11"
-           TextColor="Orange"
-           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
+                                           FontSize="11"
+                                           TextColor="#F39C12"
+                                           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}" />
 
                                 </VerticalStackLayout>
 
@@ -145,28 +165,30 @@
             </CollectionView>
         </ScrollView>
 
-        <!-- Fila 3: Reproductor SIEMPRE VISIBLE cuando está activo -->
+        <!-- Fila 3: Reproductor - MANTENIENDO ELEMENTOS ORIGINALES -->
         <Frame Grid.Row="3"
                x:Name="AudioPlayerFrame"
                IsVisible="False"
-               BackgroundColor="#E3F2FD"
+               BackgroundColor="#1A173A"
                Padding="15"
-               Margin="10,5,10,10">
+               Margin="10,5,10,10"
+               CornerRadius="15">
             <VerticalStackLayout Spacing="10">
                 <Label x:Name="NowPlayingLabel"
                        Text="Reproduciendo..." 
                        FontSize="14" 
                        FontAttributes="Bold"
+                       TextColor="#FFFFFF"
                        HorizontalOptions="Center" />
 
                 <Frame x:Name="LyricsMatchFrame"
                        IsVisible="False"
-                       BackgroundColor="#E8F5E8"
+                       BackgroundColor="#2C3E50"
                        Padding="10">
                     <Label x:Name="LyricsMatchLabel"
                            Text=""
                            FontSize="12"
-                           TextColor="#1B5E20"
+                           TextColor="#27AE60"
                            LineBreakMode="WordWrap" />
                 </Frame>
 
@@ -178,46 +200,52 @@
                             Grid.Column="0"
                             Text="▶ Play"
                             Clicked="OnPlayAudioClicked"
-                            BackgroundColor="#4CAF50"
+                            BackgroundColor="#27AE60"
                             TextColor="White"
                             FontSize="12"
-                            HeightRequest="35" />
+                            HeightRequest="35"
+                            CornerRadius="8" />
 
                     <Button x:Name="PauseButton"
                             Grid.Column="1"
                             Text="⏸️ Pause"
                             Clicked="OnPauseAudioClicked"
-                            BackgroundColor="#FF9800"
+                            BackgroundColor="#3498DB"
                             TextColor="White"
                             FontSize="12"
-                            HeightRequest="35" />
+                            HeightRequest="35"
+                            CornerRadius="8" />
 
                     <Button x:Name="StopButton"
                             Grid.Column="2"
                             Text="⏹️ Stop"
                             Clicked="OnStopAudioClicked"
-                            BackgroundColor="#F44336"
+                            BackgroundColor="#E74C3C"
                             TextColor="White"
                             FontSize="12"
-                            HeightRequest="35" />
+                            HeightRequest="35"
+                            CornerRadius="8" />
                 </Grid>
 
                 <ProgressBar x:Name="AudioProgressBar"
                              Progress="0"
-                             HeightRequest="10" />
+                             HeightRequest="10"
+                             ProgressColor="#27AE60"
+                             BackgroundColor="#2C3E50" />
 
                 <Label x:Name="TimeLabel"
                        Text="00:00 / 00:30"
                        FontSize="12"
-                       TextColor="#666"
+                       TextColor="#BBBBBB"
                        HorizontalOptions="Center" />
 
-                <Button Text="❌ Cerrar Reproductor"
+                <Button Text="❌ Cerrar"
                         Clicked="OnClosePlayerClicked"
-                        BackgroundColor="#9C27B0"
+                        BackgroundColor="#9B59B6"
                         TextColor="White"
                         FontSize="12"
-                        HorizontalOptions="End" />
+                        HorizontalOptions="End"
+                        CornerRadius="8" />
             </VerticalStackLayout>
         </Frame>
     </Grid>
