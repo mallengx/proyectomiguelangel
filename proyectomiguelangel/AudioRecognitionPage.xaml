@@ -166,26 +166,26 @@
                     </Grid>
 
                     <HorizontalStackLayout Spacing="15"
-                                           HorizontalOptions="Center"
-                                           Margin="0,10,0,0">
+                       HorizontalOptions="Center"
+                       Margin="0,10,0,0">
 
-                        <Button x:Name="YouTubeButton"
-                                Text="▶ YouTube"
-                                BackgroundColor="#FF0000"
-                                TextColor="White"
-                                FontSize="14"
-                                HeightRequest="40"
-                                CornerRadius="8"
-                                Clicked="OnOpenYouTubeClicked" />
+                        <ImageButton x:Name="YouTubeButton"
+                 Source="youtube_icon.png" 
+                            BackgroundColor="#FF0000"
+                 HeightRequest="40"
+                 WidthRequest="120"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenYouTubeClicked" />
 
-                        <Button x:Name="SpotifyButton"
-                                Text="🎧 Spotify"
+                            <ImageButton x:Name="SpotifyButton"
+                 Source="spotify_icon.png"  
                                 BackgroundColor="#1DB954"
-                                TextColor="White"
-                                FontSize="14"
-                                HeightRequest="40"
-                                CornerRadius="8"
-                                Clicked="OnOpenSpotifyClicked" />
+                 HeightRequest="40"
+                 WidthRequest="120"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenSpotifyClicked" />
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>

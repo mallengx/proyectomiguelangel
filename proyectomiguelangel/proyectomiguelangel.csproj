@@ -49,8 +49,8 @@
 
 	<ItemGroup>
 		<!-- Recursos Maui -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#fcfc12" />
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#64B5F6" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#0A2463" TintColor="#64B5F6" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\*" />
 		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
 		<MauiFont Include="Resources\Fonts\*" />
@@ -58,6 +58,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Images\spotify_icon.png" />
+	  <None Remove="Resources\Images\youtube_icon.png" />
 	  <None Remove="Resources\Raw\la_oreja_de_van_gogh___rosas_vdeo_oficial (mp3cut.net).wav" />
 	</ItemGroup>
 
