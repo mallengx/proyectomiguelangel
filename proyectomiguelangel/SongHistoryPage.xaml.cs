@@ -47,8 +47,15 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnFilterChanged(object sender, EventArgs e)
+        private async void OnFilterChanged(object sender, EventArgs e)
         {
+            if (sender is Picker picker)
+            {
+                // Animación opcional para el Picker (si quieres)
+                await picker.ScaleTo(0.98, 50, Easing.CubicInOut);
+                await picker.ScaleTo(1, 50, Easing.SpringOut);
+            }
+
             LoadHistory(); // Recargar con filtro
         }
 
@@ -56,6 +63,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
             {
+                // Animación del botón Eliminar
+                await button.AnimatePressAsync();
+
                 bool confirm = await DisplayAlert("Eliminar canción",
                     $"¿Eliminar '{song.Title}' del historial?", "Sí", "No");
 
@@ -80,6 +90,12 @@ namespace proyectomiguelangel
 
         private async void OnClearHistoryClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                // Animación del botón Limpiar Historial
+                await button.AnimatePressAsync();
+            }
+
             bool confirm = await DisplayAlert("Limpiar historial",
                 "¿Eliminar todas las canciones del historial?\n\nEsta acción no se puede deshacer.",
                 "? Sí, limpiar", "? Cancelar");
@@ -103,8 +119,15 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnRefresh(object sender, EventArgs e)
+        private async void OnRefresh(object sender, EventArgs e)
         {
+            if (sender is RefreshView refreshView)
+            {
+                // Pequeña animación para el pull-to-refresh
+                await refreshView.ScaleTo(0.995, 100);
+                await refreshView.ScaleTo(1, 100);
+            }
+
             LoadHistory();
             if (RefreshView != null)
             {
@@ -117,6 +140,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
             {
+                // Animación del botón Reproducir
+                await button.AnimatePressAsync();
+
                 try
                 {
                     if (string.IsNullOrEmpty(song.PreviewUrl))
@@ -175,17 +201,23 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnPausePreviewClicked(object sender, EventArgs e)
+        private async void OnPausePreviewClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                // Animación del botón Pausa
+                await button.AnimatePressAsync();
+            }
+
             if (_audioPlayer == null || !_isPreviewPlaying)
                 return;
 
             _audioPlayer.Pause();
             _isPreviewPlaying = false;
 
-            if (sender is Button button)
+            if (sender is Button pauseButton)
             {
-                UpdatePlaybackButtons(button, false);
+                UpdatePlaybackButtons(pauseButton, false);
             }
         }
 
@@ -236,6 +268,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
             {
+                // Animación del botón YouTube
+                await button.AnimatePressAsync();
+
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
                     return;
@@ -251,6 +286,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
             {
+                // Animación del botón Spotify
+                await button.AnimatePressAsync();
+
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
                     return;
@@ -264,6 +302,22 @@ namespace proyectomiguelangel
                 catch
                 {
                     await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
+                }
+            }
+        }
+
+
+        // Método para animar elementos de la lista al tocar
+        private async void OnHistoryItemTapped(object sender, ItemTappedEventArgs e)
+        {
+            if (sender is CollectionView collectionView && e.Item is SongHistory song)
+            {
+                // Animación sutil al tocar un elemento
+                var selectedItem = collectionView.SelectedItem;
+                if (selectedItem != null)
+                {
+                    await collectionView.ScaleTo(0.98, 50, Easing.CubicInOut);
+                    await collectionView.ScaleTo(1, 50, Easing.SpringOut);
                 }
             }
         }

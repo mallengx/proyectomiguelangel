@@ -41,6 +41,12 @@ namespace proyectomiguelangel
 
         private async void OnSelectFileClicked(object sender, EventArgs e)
         {
+            // Animación del botón
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             try
             {
                 var fileTypes = new FilePickerFileType(
@@ -172,6 +178,12 @@ namespace proyectomiguelangel
 
         private async void OnTranscribeClicked(object sender, EventArgs e)
         {
+            // Animación del botón
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (string.IsNullOrEmpty(_selectedFilePath) || !File.Exists(_selectedFilePath))
             {
                 await DisplayAlert("❌ Error", "Selecciona un archivo de audio válido primero", "OK");
@@ -289,13 +301,25 @@ namespace proyectomiguelangel
             _cancellationTokenSource = null;
         }
 
-        private void OnCancelClicked(object sender, EventArgs e)
+        private async void OnCancelClicked(object sender, EventArgs e)
         {
+            // Animación del botón
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             _cancellationTokenSource?.Cancel();
         }
 
         private async void OnCopyLyricsClicked(object sender, EventArgs e)
         {
+            // Animación del botón
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (!string.IsNullOrEmpty(TranscribedLyricsLabel.Text))
             {
                 await Clipboard.Default.SetTextAsync(TranscribedLyricsLabel.Text);
@@ -314,6 +338,12 @@ namespace proyectomiguelangel
 
         private async void OnSaveLyricsClicked(object sender, EventArgs e)
         {
+            // Animación del botón
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (string.IsNullOrEmpty(TranscribedLyricsLabel.Text))
             {
                 await DisplayAlert("❌ Error", "No hay letra para guardar", "OK");

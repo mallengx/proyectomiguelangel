@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Text.Json.Serialization;
 using Plugin.Maui.Audio;
 using System.Net.Http.Json;
-using proyectomiguelangel.Services; 
+using proyectomiguelangel.Services;
 using proyectomiguelangel.Models;
+using Microsoft.Maui.Controls;
 #if WINDOWS
 using NAudio.Wave;
 #endif
@@ -65,6 +66,7 @@ namespace proyectomiguelangel
             }
         }
 #endif
+
         private async Task<(string cover, string preview)> SearchDeezerAsync(string title, string artist)
         {
             try
@@ -86,6 +88,7 @@ namespace proyectomiguelangel
 
             return (string.Empty, string.Empty);
         }
+
         private void StartRecordingTimer()
         {
             _recordingSeconds = 0;
@@ -111,6 +114,11 @@ namespace proyectomiguelangel
 
         private async void OnStartRecordingClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             try
             {
                 if (_hasResultShown)
@@ -195,6 +203,11 @@ namespace proyectomiguelangel
 
         private async void OnStopRecordingClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (!isRecording)
                 return;
 
@@ -339,14 +352,21 @@ namespace proyectomiguelangel
                 System.Diagnostics.Debug.WriteLine($"Error guardando en historial: {ex.Message}");
             }
         }
+
         private void UpdateRecordingUI(bool isRecording)
         {
             StartRecordingButton.IsEnabled = !isRecording;
             StopRecordingButton.IsEnabled = isRecording;
             RecordingStatusFrame.IsVisible = isRecording;
         }
+
         private async void OnPlayPreviewClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             try
             {
                 if (string.IsNullOrEmpty(_previewUrl))
@@ -380,22 +400,28 @@ namespace proyectomiguelangel
                 await DisplayAlert("Error", ex.Message, "OK");
             }
         }
-        private void OnPausePreviewClicked(object sender, EventArgs e)
+
+        private async void OnPausePreviewClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (_audioPlayer == null)
                 return;
 
             _audioPlayer.Pause();
             _isPreviewPlaying = false;
         }
-        private void ResetRecordingState()
-        {
-            UpdateRecordingUI(false);
-            RecordingStatusLabel.Text = "Escuchando...";
-            StopRecordingTimer();
-        }
+
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
+            if (sender is ImageButton imageButton)
+            {
+                await AnimateImageButtonAsync(imageButton);
+            }
+
             if (string.IsNullOrWhiteSpace(_currentTitle) ||
                 string.IsNullOrWhiteSpace(_currentArtist))
                 return;
@@ -405,8 +431,14 @@ namespace proyectomiguelangel
 
             await Launcher.OpenAsync(url);
         }
+
         private async void OnOpenSpotifyClicked(object sender, EventArgs e)
         {
+            if (sender is ImageButton imageButton)
+            {
+                await AnimateImageButtonAsync(imageButton);
+            }
+
             if (string.IsNullOrWhiteSpace(_currentTitle) ||
                 string.IsNullOrWhiteSpace(_currentArtist))
                 return;
@@ -424,13 +456,38 @@ namespace proyectomiguelangel
                 await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
             }
         }
+
+        private void ResetRecordingState()
+        {
+            UpdateRecordingUI(false);
+            RecordingStatusLabel.Text = "Escuchando...";
+            StopRecordingTimer();
+        }
+
+        // Método para animar ImageButtons
+        private async Task AnimateImageButtonAsync(ImageButton imageButton, int duration = 100)
+        {
+            try
+            {
+                uint durationMs = (uint)duration;
+
+                // Animación de pulsación
+                await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error animando ImageButton: {ex.Message}");
+            }
+        }
+
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
 
 #if WINDOWS
-    waveIn?.Dispose();
-    writer?.Dispose();
+            waveIn?.Dispose();
+            writer?.Dispose();
 #endif
 
             _audioPlayer?.Stop();
@@ -453,6 +510,7 @@ namespace proyectomiguelangel
         [JsonPropertyName("title")] public string Title { get; set; }
         [JsonPropertyName("album")] public string Album { get; set; }
     }
+
     public class DeezerResponse1
     {
         [JsonPropertyName("data")]
@@ -472,5 +530,73 @@ namespace proyectomiguelangel
     {
         [JsonPropertyName("cover_medium")]
         public string CoverMedium { get; set; }
+    }
+
+    public static class ButtonExtensions
+    {
+        public static async Task AnimatePressAsync(this Button button, int duration = 100)
+        {
+            try
+            {
+                // Convertir int a uint
+                uint durationMs = (uint)duration;
+
+                // Verificar que el botón esté disponible
+                if (button == null) return;
+
+                // Animación de pulsación con rebote
+                await button.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await button.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                // Registrar error sin interrumpir flujo
+                System.Diagnostics.Debug.WriteLine($"Error en animación: {ex.Message}");
+            }
+        }
+
+        public static async Task AnimatePressWithColorAsync(this Button button, Color pressedColor, int duration = 100)
+        {
+            try
+            {
+                if (button == null) return;
+
+                uint durationMs = (uint)duration;
+                var originalColor = button.BackgroundColor;
+
+                // Cambiar color durante la pulsación
+                button.BackgroundColor = pressedColor;
+                await button.ScaleTo(0.92, durationMs, Easing.CubicInOut);
+
+                // Restaurar
+                await button.ScaleTo(1, durationMs, Easing.CubicInOut);
+                button.BackgroundColor = originalColor;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en animación con color: {ex.Message}");
+            }
+        }
+    }
+
+    // Extensión para ImageButton (opcional, si quieres método de extensión)
+    public static class ImageButtonExtensions
+    {
+        public static async Task AnimatePressAsync(this ImageButton imageButton, int duration = 100)
+        {
+            try
+            {
+                uint durationMs = (uint)duration;
+
+                if (imageButton == null) return;
+
+                await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error animando ImageButton: {ex.Message}");
+            }
+        }
     }
 }

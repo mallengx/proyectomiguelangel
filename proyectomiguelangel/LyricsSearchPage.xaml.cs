@@ -23,6 +23,12 @@ namespace proyectomiguelangel
 
         private async void OnBuscarClicked(object sender, EventArgs e)
         {
+            // Animación del botón Buscar
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             _searchText = txtBusqueda.Text?.Trim() ?? string.Empty;
 
             if (string.IsNullOrEmpty(_searchText))
@@ -417,6 +423,9 @@ namespace proyectomiguelangel
             {
                 try
                 {
+                    // Animación del botón
+                    await button.AnimatePressAsync();
+
                     // Mostrar loading en el botón
                     if (button.Parent is Grid grid)
                     {
@@ -563,8 +572,13 @@ namespace proyectomiguelangel
             });
         }
 
-        private void OnPlayAudioClicked(object sender, EventArgs e)
+        private async void OnPlayAudioClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (_audioPlayer != null && !_isAudioPlaying)
             {
                 _audioPlayer.Play();
@@ -573,8 +587,13 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnPauseAudioClicked(object sender, EventArgs e)
+        private async void OnPauseAudioClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             if (_audioPlayer != null && _isAudioPlaying)
             {
                 _audioPlayer.Pause();
@@ -583,13 +602,23 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnStopAudioClicked(object sender, EventArgs e)
+        private async void OnStopAudioClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             StopAudio();
         }
 
-        private void OnClosePlayerClicked(object sender, EventArgs e)
+        private async void OnClosePlayerClicked(object sender, EventArgs e)
         {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
             StopAudio();
             AudioPlayerFrame.IsVisible = false;
             LyricsMatchFrame.IsVisible = false;
@@ -645,6 +674,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongResult song)
             {
+                // Animación del botón
+                await button.AnimatePressAsync();
+
                 await Launcher.OpenAsync(song.YouTubeUrl);
             }
         }
@@ -653,6 +685,9 @@ namespace proyectomiguelangel
         {
             if (sender is Button button && button.CommandParameter is SongResult song)
             {
+                // Animación del botón
+                await button.AnimatePressAsync();
+
                 await Launcher.OpenAsync(song.SpotifyUrl);
             }
         }
