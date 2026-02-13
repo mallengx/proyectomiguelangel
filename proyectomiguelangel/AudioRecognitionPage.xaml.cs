@@ -300,56 +300,109 @@ namespace proyectomiguelangel
 
         private async void ShowResult(AudDResult result)
         {
-            ResultsFrame.IsVisible = true;
-            _currentTitle = result.Title;
-            _currentArtist = result.Artist;
-            SongTitleLabel.Text = result.Title ?? "Título no disponible";
-            ArtistLabel.Text = result.Artist ?? "Artista no disponible";
-            AlbumLabel.Text = result.Album ?? "Álbum no disponible";
-
-            // Buscar info en Deezer
-            var deezer = await SearchDeezerAsync(result.Title, result.Artist);
-
-            if (!string.IsNullOrEmpty(deezer.cover))
+            try
             {
-                CoverImage.Source = ImageSource.FromUri(new Uri(deezer.cover));
+                ResultsFrame.IsVisible = true;
+                _currentTitle = result.Title;
+                _currentArtist = result.Artist;
+
+                SongTitleLabel.Text = result.Title ?? "Título no disponible";
+                ArtistLabel.Text = result.Artist ?? "Artista no disponible";
+                AlbumLabel.Text = result.Album ?? "Álbum no disponible";
+
+                // Buscar info en Deezer
+                var deezer = await SearchDeezerAsync(result.Title, result.Artist);
+
+                if (!string.IsNullOrEmpty(deezer.cover))
+                {
+                    CoverImage.Source = ImageSource.FromUri(new Uri(deezer.cover));
+                }
+                else
+                {
+                    CoverImage.Source = "default_album.png"; // Imagen por defecto
+                }
+
+                _previewUrl = deezer.preview;
+
+                // ✅ MOSTRAR BOTONES DE PREVIEW CORRECTAMENTE
+                if (!string.IsNullOrEmpty(_previewUrl))
+                {
+                    PreviewPlayButton.IsVisible = true;
+                    PreviewPauseButton.IsVisible = false;
+
+                    // También guardamos el preview en el objeto para el historial
+                }
+                else
+                {
+                    PreviewPlayButton.IsVisible = false;
+                    PreviewPauseButton.IsVisible = false;
+
+                    // Mostrar label de "Preview no disponible"
+                    var noPreviewLabel = new Label
+                    {
+                        Text = "🎵 Preview no disponible",
+                        FontSize = 12,
+                        TextColor = Color.FromArgb("#F39C12"),
+                        HorizontalOptions = LayoutOptions.Center,
+                        Margin = new Thickness(0, 5, 0, 0)
+                    };
+
+                    // Buscar el HorizontalStackLayout y agregar el label
+                    var parentLayout = PreviewPlayButton.Parent as HorizontalStackLayout;
+                    if (parentLayout != null)
+                    {
+                        parentLayout.Children.Clear();
+                        parentLayout.Children.Add(noPreviewLabel);
+                    }
+                }
+
+                // ✅ GUARDAR EN HISTORIAL (con preview URL)
+                await SaveToHistory(result, deezer.cover, _previewUrl, "AudioRecognition");
             }
-
-            _previewUrl = deezer.preview;
-            PreviewPlayButton.IsVisible = !string.IsNullOrEmpty(_previewUrl);
-            PreviewPauseButton.IsVisible = false;
-
-            // GUARDAR EN HISTORIAL
-            await SaveToHistory(result, deezer.cover, deezer.preview, "AudioRecognition");
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Error mostrando resultado: {ex.Message}", "OK");
+            }
         }
 
         private async Task SaveToHistory(AudDResult result, string coverUrl, string previewUrl, string source)
         {
             try
             {
+                // Verificar si el preview es válido antes de guardar
+                string validPreviewUrl = previewUrl;
+                if (!string.IsNullOrEmpty(previewUrl))
+                {
+                    var previewService = new PreviewRefreshService();
+                    bool isValid = await previewService.IsPreviewUrlValidAsync(previewUrl);
+                    if (!isValid)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"⚠️ Preview no válido al guardar, intentando refrescar...");
+                        validPreviewUrl = await previewService.RefreshPreviewUrlAsync(result.Title, result.Artist);
+                    }
+                }
+
                 var historyItem = new SongHistory
                 {
-                    Title = result.Title,
-                    Artist = result.Artist,
-                    Album = result.Album,
-                    CoverUrl = coverUrl,
-                    PreviewUrl = previewUrl,
+                    Title = result.Title ?? "Título no disponible",
+                    Artist = result.Artist ?? "Artista no disponible",
+                    Album = result.Album ?? "Álbum no disponible",
+                    CoverUrl = coverUrl ?? string.Empty,
+                    PreviewUrl = validPreviewUrl ?? string.Empty,
                     DetectedDate = DateTime.Now,
                     Source = source,
-                    SearchQuery = "" // Vacío para AudioRecognition
+                    SearchQuery = ""
                 };
 
                 var databaseService = new DatabaseService();
                 await databaseService.InitializeAsync();
                 await databaseService.SaveSongAsync(historyItem);
 
-                // Notificación opcional
-                await DisplayAlert("✅ Guardado",
-                    $"{result.Title} se ha guardado en el historial", "OK");
+                System.Diagnostics.Debug.WriteLine($"✅ Guardado en historial: {result.Title} - Preview: {(string.IsNullOrEmpty(validPreviewUrl) ? "NO" : "SÍ")}");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error guardando en historial: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Error guardando en historial: {ex.Message}");
             }
         }
 

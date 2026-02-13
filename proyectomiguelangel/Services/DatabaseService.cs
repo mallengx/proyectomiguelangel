@@ -52,10 +52,19 @@ namespace proyectomiguelangel.Services
 
             if (existing != null)
             {
-                // Actualizar fecha de detección
+                // Actualizar fecha y otros datos
                 existing.DetectedDate = DateTime.Now;
                 existing.CoverUrl = song.CoverUrl;
-                existing.PreviewUrl = song.PreviewUrl;
+
+                // Solo actualizar preview si el nuevo NO está vacío
+                if (!string.IsNullOrEmpty(song.PreviewUrl))
+                {
+                    existing.PreviewUrl = song.PreviewUrl;
+                }
+
+                existing.Source = song.Source;
+                existing.SearchQuery = song.SearchQuery;
+
                 return await _database.UpdateAsync(existing);
             }
 

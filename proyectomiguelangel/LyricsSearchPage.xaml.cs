@@ -670,6 +670,36 @@ namespace proyectomiguelangel
             base.OnDisappearing();
             StopAudio();
         }
+
+        private async Task SaveToHistory(SongResult song, string searchQuery)
+        {
+            try
+            {
+                var historyItem = new SongHistory
+                {
+                    Title = song.Title ?? "Título no disponible",
+                    Artist = song.Artist ?? "Artista no disponible",
+                    Album = song.Album ?? "Álbum no disponible",
+                    CoverUrl = song.CoverArt ?? string.Empty,
+                    PreviewUrl = song.PreviewUrl ?? string.Empty,
+                    DetectedDate = DateTime.Now,
+                    Source = "LyricsSearch", // ← IMPORTANTE: Debe ser exactamente "LyricsSearch"
+                    SearchQuery = searchQuery ?? song.Title // Guardamos la búsqueda
+                };
+
+                var databaseService = new DatabaseService();
+                await databaseService.InitializeAsync();
+                await databaseService.SaveSongAsync(historyItem);
+
+                System.Diagnostics.Debug.WriteLine($"✅ Guardado en historial: {song.Title} - Fuente: LyricsSearch");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error guardando en historial: {ex.Message}");
+            }
+        }
+
+
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is SongResult song)

@@ -6,23 +6,48 @@ namespace proyectomiguelangel.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string source && parameter is string param)
+            if (value is string source)
             {
                 // Si viene el parámetro "showquery", devolver bool para mostrar/ocultar
-                if (param == "showquery")
+                if (parameter is string param)
                 {
-                    return source == "LyricsSearch";
-                }
-
-                // Si viene el parámetro "icon", devolver el icono
-                if (param == "icon")
-                {
-                    return source switch
+                    switch (param)
                     {
-                        "AudioRecognition" => "🎤",
-                        "LyricsSearch" => "🔍",
-                        _ => "📝"
-                    };
+                        case "showquery":
+                            return source == "LyricsSearch";
+
+                        case "icon":
+                            return source switch
+                            {
+                                "AudioRecognition" => "🎤",
+                                "LyricsSearch" => "🔍",
+                                _ => "📝"
+                            };
+
+                        case "color":
+                            return source switch
+                            {
+                                "AudioRecognition" => Color.FromArgb("#27AE60"), // Verde
+                                "LyricsSearch" => Color.FromArgb("#3498DB"),     // Azul
+                                _ => Color.FromArgb("#9B59B6")                  // Púrpura
+                            };
+
+                        case "bgcolor":
+                            return source switch
+                            {
+                                "AudioRecognition" => Color.FromArgb("#27AE60"), // Verde
+                                "LyricsSearch" => Color.FromArgb("#3498DB"),     // Azul
+                                _ => Color.FromArgb("#9B59B6")                  // Púrpura
+                            };
+
+                        case "textcolor":
+                            return source switch
+                            {
+                                "AudioRecognition" => Color.FromArgb("#27AE60"), // Verde
+                                "LyricsSearch" => Color.FromArgb("#3498DB"),     // Azul
+                                _ => Color.FromArgb("#9B59B6")                  // Púrpura
+                            };
+                    }
                 }
             }
 
@@ -31,11 +56,12 @@ namespace proyectomiguelangel.Converters
             {
                 return sourceDefault switch
                 {
-                    "AudioRecognition" => "🎤 Identificada",
-                    "LyricsSearch" => "🔍 Buscada",
+                    "AudioRecognition" => "🎤 Identificada por audio",
+                    "LyricsSearch" => "🔍 Buscada por letra",
                     _ => "📝"
                 };
             }
+
             return "📝";
         }
 
