@@ -10,27 +10,24 @@
         <ResourceDictionary>
             <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
             <converters:SourceToIconConverter x:Key="SourceToIconConverter" />
-            <ResourceDictionary>
-                <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
-                <converters:SourceToIconConverter x:Key="SourceToIconConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
 
-                <!-- Estilos para botones de preview -->
-                <Style x:Key="PreviewPlayButtonStyle" TargetType="Button">
-                    <Setter Property="BackgroundColor" Value="#27AE60"/>
-                    <Setter Property="TextColor" Value="White"/>
-                    <Setter Property="FontSize" Value="12"/>
-                    <Setter Property="HeightRequest" Value="35"/>
-                    <Setter Property="CornerRadius" Value="8"/>
-                </Style>
+            <!-- Estilos para botones de preview -->
+            <Style x:Key="PreviewPlayButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#27AE60"/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="HeightRequest" Value="35"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
 
-                <Style x:Key="PreviewPauseButtonStyle" TargetType="Button">
-                    <Setter Property="BackgroundColor" Value="#3498DB"/>
-                    <Setter Property="TextColor" Value="White"/>
-                    <Setter Property="FontSize" Value="12"/>
-                    <Setter Property="HeightRequest" Value="35"/>
-                    <Setter Property="CornerRadius" Value="8"/>
-                </Style>
-            </ResourceDictionary>
+            <Style x:Key="PreviewPauseButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#3498DB"/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="HeightRequest" Value="35"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
@@ -38,334 +35,311 @@
         <ToolbarItem Text="🗑️ Limpiar" Clicked="OnClearHistoryClicked" />
     </ContentPage.ToolbarItems>
 
-    <!-- ✅ AGREGAMOS SCROLLVIEW PRINCIPAL -->
-    <ScrollView>
-        <VerticalStackLayout Spacing="0">
+    <Grid RowDefinitions="Auto,*">
+        <!-- Filtros -->
+        <Frame Grid.Row="0" 
+               BackgroundColor="#1A173A" 
+               Padding="15"
+               Margin="10,10,10,5"
+               CornerRadius="15"
+               BorderColor="#9B59B6">
+            <VerticalStackLayout Spacing="15">
+                <Label Text="Filtrar historial"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="#FFFFFF"
+                       HorizontalOptions="Center"/>
 
-            <!-- Filtros -->
-            <Frame BackgroundColor="#1A173A" 
-                   Padding="15"
-                   Margin="10,10,10,5"
-                   CornerRadius="15"
-                   BorderColor="#9B59B6">
-                <VerticalStackLayout Spacing="15">
+                <Picker x:Name="FilterPicker"
+                        Title="Seleccionar filtro..."
+                        TitleColor="#BBBBBB"
+                        TextColor="#FFFFFF"
+                        BackgroundColor="#2C3E50"
+                        SelectedIndexChanged="OnFilterChanged">
+                    <Picker.Items>
+                        <x:String>📋 Todas las canciones</x:String>
+                        <x:String>🎤 Solo identificadas por audio</x:String>
+                        <x:String>🔍 Solo búsquedas por letra</x:String>
+                    </Picker.Items>
+                </Picker>
 
-                    <Label Text="Filtrar historial"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="#FFFFFF"
-                           HorizontalOptions="Center"/>
-
-                    <!-- Picker -->
-                    <Picker x:Name="FilterPicker"
-                            Title="Seleccionar filtro..."
-                            TitleColor="#BBBBBB"
-                            TextColor="#FFFFFF"
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <Button Grid.Column="0"
+                            x:Name="BtnAll"
+                            Text="📋 Todas"
                             BackgroundColor="#2C3E50"
-                            SelectedIndexChanged="OnFilterChanged">
-                        <Picker.Items>
-                            <x:String>📋 Todas las canciones</x:String>
-                            <x:String>🎤 Solo identificadas por audio</x:String>
-                            <x:String>🔍 Solo búsquedas por letra</x:String>
-                        </Picker.Items>
-                    </Picker>
+                            TextColor="#FFFFFF"
+                            FontSize="12"
+                            HeightRequest="40"
+                            CornerRadius="8"
+                            Clicked="OnQuickFilterAll"
+                            BorderColor="#9B59B6"
+                            BorderWidth="0.5"/>
 
-                    <!-- Botones de filtro rápido -->
-                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                        <Button Grid.Column="0"
-                                x:Name="BtnAll"
-                                Text="📋 Todas"
-                                BackgroundColor="#2C3E50"
-                                TextColor="#FFFFFF"
-                                FontSize="12"
-                                HeightRequest="40"
-                                CornerRadius="8"
-                                Clicked="OnQuickFilterAll"
-                                BorderColor="#9B59B6"
-                                BorderWidth="0.5"/>
+                    <Button Grid.Column="1"
+                            x:Name="BtnAudio"
+                            Text="🎤 Audio"
+                            BackgroundColor="#2C3E50"
+                            TextColor="#FFFFFF"
+                            FontSize="12"
+                            HeightRequest="40"
+                            CornerRadius="8"
+                            Clicked="OnQuickFilterAudio"
+                            BorderColor="#27AE60"
+                            BorderWidth="0.5"/>
 
-                        <Button Grid.Column="1"
-                                x:Name="BtnAudio"
-                                Text="🎤 Audio"
-                                BackgroundColor="#2C3E50"
-                                TextColor="#FFFFFF"
-                                FontSize="12"
-                                HeightRequest="40"
-                                CornerRadius="8"
-                                Clicked="OnQuickFilterAudio"
-                                BorderColor="#27AE60"
-                                BorderWidth="0.5"/>
+                    <Button Grid.Column="2"
+                            x:Name="BtnLyrics"
+                            Text="🔍 Letra"
+                            BackgroundColor="#2C3E50"
+                            TextColor="#FFFFFF"
+                            FontSize="12"
+                            HeightRequest="40"
+                            CornerRadius="8"
+                            Clicked="OnQuickFilterLyrics"
+                            BorderColor="#3498DB"
+                            BorderWidth="0.5"/>
+                </Grid>
 
-                        <Button Grid.Column="2"
-                                x:Name="BtnLyrics"
-                                Text="🔍 Letra"
-                                BackgroundColor="#2C3E50"
-                                TextColor="#FFFFFF"
-                                FontSize="12"
-                                HeightRequest="40"
-                                CornerRadius="8"
-                                Clicked="OnQuickFilterLyrics"
-                                BorderColor="#3498DB"
-                                BorderWidth="0.5"/>
-                    </Grid>
+                <Grid ColumnDefinitions="*,*">
+                    <Label Grid.Column="0"
+                           Text="Resultados:"
+                           FontSize="14"
+                           TextColor="#BBBBBB"
+                           HorizontalOptions="End"/>
 
-                    <!-- Contador -->
-                    <Grid ColumnDefinitions="*,*">
-                        <Label Grid.Column="0"
-                               Text="Resultados:"
-                               FontSize="14"
-                               TextColor="#BBBBBB"
-                               HorizontalOptions="End"/>
+                    <Label x:Name="CountLabel"
+                           Grid.Column="1"
+                           Text="0"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#27AE60"
+                           HorizontalOptions="Start"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
 
-                        <Label x:Name="CountLabel"
-                               Grid.Column="1"
-                               Text="0"
-                               FontSize="20"
+        <!-- Lista de historial -->
+        <RefreshView Grid.Row="1"
+                     x:Name="RefreshView"
+                     Refreshing="OnRefresh"
+                     Margin="0,5,0,0">
+
+            <CollectionView x:Name="HistoryCollectionView"
+                            ItemsSource="{Binding FilteredSongs}"
+                            VerticalScrollBarVisibility="Always">
+
+                <CollectionView.EmptyView>
+                    <StackLayout HorizontalOptions="Center" 
+                                 VerticalOptions="Center"
+                                 Padding="40"
+                                 Spacing="20">
+                        <Label Text="📜"
+                               FontSize="48"
+                               HorizontalOptions="Center" />
+                        <Label Text="No hay canciones en el historial"
+                               FontSize="18"
                                FontAttributes="Bold"
-                               TextColor="#27AE60"
-                               HorizontalOptions="Start"/>
-                    </Grid>
-                </VerticalStackLayout>
-            </Frame>
+                               HorizontalOptions="Center"
+                               TextColor="#FFFFFF"/>
+                        <Label Text="Las canciones que identifiques o busques aparecerán aquí"
+                               FontSize="14"
+                               HorizontalOptions="Center"
+                               TextColor="#BBBBBB"
+                               HorizontalTextAlignment="Center"/>
+                    </StackLayout>
+                </CollectionView.EmptyView>
 
-            <!-- ✅ LISTA CON SCROLL PROPIO -->
-            <RefreshView x:Name="RefreshView"
-                         Refreshing="OnRefresh"
-                         Margin="0,5,0,0">
-
-                <CollectionView x:Name="HistoryCollectionView"
-                                SelectionMode="None"
-                                ItemsSource="{Binding FilteredSongs}"
-                                VerticalScrollBarVisibility="Always"
-                                HeightRequest="600">
-                    <!-- Altura fija para scroll -->
-
-                    <CollectionView.EmptyView>
-                        <StackLayout HorizontalOptions="Center" 
-                                     VerticalOptions="Center"
-                                     Padding="40"
-                                     Spacing="20">
-                            <Label Text="📜"
-                                   FontSize="48"
-                                   HorizontalOptions="Center" />
-                            <Label Text="No hay canciones en el historial"
-                                   FontSize="18"
-                                   FontAttributes="Bold"
-                                   HorizontalOptions="Center"
-                                   TextColor="#FFFFFF"/>
-                            <Label Text="Las canciones que identifiques o busques aparecerán aquí"
-                                   FontSize="14"
-                                   HorizontalOptions="Center"
-                                   TextColor="#BBBBBB"
-                                   HorizontalTextAlignment="Center"/>
-                        </StackLayout>
-                    </CollectionView.EmptyView>
-
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate>
-                            <Frame BackgroundColor="#1A173A" 
-                                   Padding="15"
-                                   CornerRadius="15"
-                                   Margin="10,5,10,10"
-                                   BorderColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='color'}"
-                                   HasShadow="True">
-
-                                <VerticalStackLayout Spacing="10">
-
-                                    <!-- Encabezado -->
-                                    <Grid ColumnDefinitions="Auto,*,Auto,Auto">
-                                        <Frame Grid.Column="0"
-                                               BackgroundColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='bgcolor'}"
-                                               Padding="8,3"
-                                               CornerRadius="12"
-                                               Margin="0,0,10,0"
-                                               HasShadow="False">
-                                            <Label Text="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='icon'}"
-                                                   FontSize="12"
-                                                   TextColor="#FFFFFF"/>
-                                        </Frame>
-
-                                        <Label Grid.Column="1"
-                                               Text="{Binding DetectedDate, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
-                                               FontSize="11"
-                                               TextColor="#BBBBBB"
-                                               VerticalOptions="Center"/>
-
-                                        <Label Grid.Column="2"
-                                               Text="{Binding Source}"
-                                               FontSize="10"
-                                               TextColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='textcolor'}"
-                                               VerticalOptions="Center"
-                                               Margin="0,0,10,0"/>
-
-                                        <Button Grid.Column="3"
-                                                Text="❌"
-                                                FontSize="12"
-                                                BackgroundColor="Transparent"
-                                                TextColor="#E74C3C"
-                                                WidthRequest="30"
-                                                HeightRequest="30"
-                                                Clicked="OnDeleteSongClicked"
-                                                CommandParameter="{Binding .}"/>
-                                    </Grid>
-
-                                    <!-- Contenido principal -->
-                                    <Grid ColumnDefinitions="100,*"
-                                          RowDefinitions="Auto,Auto,Auto"
-                                          ColumnSpacing="15"
-                                          Margin="0,5,0,0">
-
-                                        <!-- Carátula -->
-                                        <Frame Grid.Row="0"
-                                               Grid.RowSpan="3"
-                                               Grid.Column="0"
-                                               Padding="0"
-                                               CornerRadius="10"
-                                               BackgroundColor="#2C3E50"
-                                               BorderColor="#3498DB"
-                                               HeightRequest="100"
-                                               WidthRequest="100">
-                                            <Image HeightRequest="100"
-                                                   WidthRequest="100"
-                                                   Aspect="AspectFill">
-                                                <Image.Source>
-                                                    <UriImageSource Uri="{Binding CoverUrl}" 
-                                                                   CacheValidity="30:00:00:00" 
-                                                                   CachingEnabled="True"/>
-                                                </Image.Source>
-                                            </Image>
-                                        </Frame>
-
-                                        <!-- Título y artista -->
-                                        <Label Grid.Row="0"
-                                               Grid.Column="1"
-                                               Text="{Binding Title}" 
-                                               FontSize="16" 
-                                               FontAttributes="Bold" 
-                                               TextColor="#FFFFFF"
-                                               LineBreakMode="TailTruncation" />
-
-                                        <Label Grid.Row="1"
-                                               Grid.Column="1"
-                                               Text="{Binding Artist}"
-                                               FontSize="14"
-                                               TextColor="#3498DB"
-                                               LineBreakMode="TailTruncation" />
-
-                                        <Label Grid.Row="2"
-                                               Grid.Column="1"
-                                               Text="{Binding Album}"
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BackgroundColor="#1A173A" 
+                               Padding="15"
+                               CornerRadius="15"
+                               Margin="10,5,10,10"
+                               BorderColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='color'}"
+                               HasShadow="True">
+                            <VerticalStackLayout Spacing="10">
+                                <!-- Encabezado -->
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <Frame Grid.Column="0"
+                                           BackgroundColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='bgcolor'}"
+                                           Padding="8,3"
+                                           CornerRadius="12"
+                                           Margin="0,0,10,0"
+                                           HasShadow="False">
+                                        <Label Text="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='icon'}"
                                                FontSize="12"
-                                               TextColor="#BBBBBB"
-                                               LineBreakMode="TailTruncation"
-                                               IsVisible="{Binding Album, Converter={StaticResource StringToBoolConverter}}" />
-                                    </Grid>
-
-                                    <!-- Búsqueda original (solo para LyricsSearch) -->
-                                    <Frame IsVisible="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='showquery'}"
-                                           BackgroundColor="#2C3E50"
-                                           Padding="10"
-                                           CornerRadius="8"
-                                           Margin="0,5,0,0">
-                                        <Label Text="{Binding SearchQuery, StringFormat='🔍 Buscado: &quot;{0}&quot;'}"
-                                               FontSize="11"
-                                               TextColor="#F39C12"
-                                               LineBreakMode="WordWrap"/>
+                                               TextColor="#FFFFFF"/>
                                     </Frame>
 
-                                    <!-- ✅ CONTROLES DE PREVIEW - CORREGIDO -->
-                                    <Grid ColumnDefinitions="*,*"
-      Margin="0,10,0,0">
+                                    <Label Grid.Column="1"
+                                           Text="{Binding DetectedDate, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                           FontSize="11"
+                                           TextColor="#BBBBBB"
+                                           VerticalOptions="Center"/>
 
-                                        <!-- Columna izquierda: Controles de preview -->
-                                        <Grid Grid.Column="0"
-          IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}">
-                                            <Grid.RowDefinitions>
-                                                <RowDefinition Height="Auto"/>
-                                                <RowDefinition Height="Auto"/>
-                                            </Grid.RowDefinitions>
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Source}"
+                                           FontSize="10"
+                                           TextColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='textcolor'}"
+                                           VerticalOptions="Center"
+                                           Margin="0,0,10,0"/>
 
-                                            <Label Grid.Row="0"
-               Text="🎧 Preview 30s"
-               FontSize="12"
-               TextColor="#BBBBBB"
-               Margin="0,0,0,5"/>
+                                    <Button Grid.Column="3"
+                                            Text="❌"
+                                            FontSize="12"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#E74C3C"
+                                            WidthRequest="30"
+                                            HeightRequest="30"
+                                            Clicked="OnDeleteSongClicked"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
 
-                                            <!-- Modifica el HorizontalStackLayout de los botones de preview para agregar x:Name y llamar al registro -->
-                                            <HorizontalStackLayout Grid.Row="1"
-                       Spacing="10"
-                       x:Name="PreviewButtonsLayout"
-                       BindingContextChanged="PreviewButtonsLayout_BindingContextChanged">
+                                <!-- Contenido principal -->
+                                <Grid ColumnDefinitions="100,*"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      ColumnSpacing="15"
+                                      Margin="0,5,0,0">
+                                    <!-- Carátula -->
+                                    <Frame Grid.Row="0"
+                                           Grid.RowSpan="3"
+                                           Grid.Column="0"
+                                           Padding="0"
+                                           CornerRadius="10"
+                                           BackgroundColor="#2C3E50"
+                                           BorderColor="#3498DB"
+                                           HeightRequest="100"
+                                           WidthRequest="100">
+                                        <Image HeightRequest="100"
+                                               WidthRequest="100"
+                                               Aspect="AspectFill">
+                                            <Image.Source>
+                                                <UriImageSource Uri="{Binding CoverUrl}" 
+                                                               CacheValidity="30:00:00:00" 
+                                                               CachingEnabled="True"/>
+                                            </Image.Source>
+                                        </Image>
+                                    </Frame>
 
-                                                <Button x:Name="PlayBtn"
-            Text="▶ Reproducir"
-            BackgroundColor="#27AE60"
-            TextColor="White"
-            FontSize="12"
-            HeightRequest="35"
-            CornerRadius="8"
-            Clicked="OnPlayPreviewClicked"
-            CommandParameter="{Binding .}"/>
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="{Binding Title}" 
+                                           FontSize="16" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#FFFFFF"
+                                           LineBreakMode="TailTruncation" />
 
-                                                <Button x:Name="PauseBtn"
-            Text="⏸ Pausa"
-            BackgroundColor="#3498DB"
-            TextColor="White"
-            FontSize="12"
-            HeightRequest="35"
-            CornerRadius="8"
-            Clicked="OnPausePreviewClicked"
-            CommandParameter="{Binding .}"
-            IsVisible="False"/>
-                                            </HorizontalStackLayout>
-                                        </Grid>
+                                    <Label Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="{Binding Artist}"
+                                           FontSize="14"
+                                           TextColor="#3498DB"
+                                           LineBreakMode="TailTruncation" />
 
-                                        <!-- Mensaje cuando no hay preview -->
-                                        <Frame Grid.Column="0"
-           BackgroundColor="#2C3E50"
-           Padding="10"
-           CornerRadius="8"
-           IsVisible="{Binding PreviewUrl, Converter={x:Static converters:StringToBoolConverter.Instance}, ConverterParameter='invert'}">
-                                            <Label Text="🎵 Preview no disponible"
-               FontSize="12"
-               TextColor="#F39C12"/>
-                                        </Frame>
+                                    <Label Grid.Row="2"
+                                           Grid.Column="1"
+                                           Text="{Binding Album}"
+                                           FontSize="12"
+                                           TextColor="#BBBBBB"
+                                           LineBreakMode="TailTruncation"
+                                           IsVisible="{Binding Album, Converter={StaticResource StringToBoolConverter}}" />
+                                </Grid>
 
-                                        <!-- Botones YouTube/Spotify -->
-                                        <HorizontalStackLayout Grid.Column="1"
+                                <!-- Búsqueda original -->
+                                <Frame IsVisible="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='showquery'}"
+                                       BackgroundColor="#2C3E50"
+                                       Padding="10"
+                                       CornerRadius="8"
+                                       Margin="0,5,0,0">
+                                    <Label Text="{Binding SearchQuery, StringFormat='🔍 Buscado: &quot;{0}&quot;'}"
+                                           FontSize="11"
+                                           TextColor="#F39C12"
+                                           LineBreakMode="WordWrap"/>
+                                </Frame>
+
+                                <!-- Controles de preview -->
+                                <Grid ColumnDefinitions="*,*"
+                                      Margin="0,10,0,0">
+                                    <!-- Columna izquierda -->
+                                    <Grid Grid.Column="0"
+                                          IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Label Grid.Row="0"
+                                               Text="🎧 Preview 30s"
+                                               FontSize="12"
+                                               TextColor="#BBBBBB"
+                                               Margin="0,0,0,5"/>
+
+                                        <HorizontalStackLayout Grid.Row="1"
                                                                Spacing="10"
-                                                               HorizontalOptions="End"
-                                                               VerticalOptions="Center">
-                                            <Button Text="▶ YouTube"
-                                                    BackgroundColor="#FF0000"
+                                                               x:Name="PreviewButtonsLayout"
+                                                               BindingContextChanged="PreviewButtonsLayout_BindingContextChanged">
+                                            <Button Text="▶ Reproducir"
+                                                    BackgroundColor="#27AE60"
                                                     TextColor="White"
                                                     FontSize="12"
                                                     HeightRequest="35"
                                                     CornerRadius="8"
-                                                    Clicked="OnOpenYouTubeClicked"
+                                                    Clicked="OnPlayPreviewClicked"
                                                     CommandParameter="{Binding .}"/>
 
-                                            <Button Text="🎧 Spotify"
-                                                    BackgroundColor="#1DB954"
+                                            <Button Text="⏸ Pausa"
+                                                    BackgroundColor="#3498DB"
                                                     TextColor="White"
                                                     FontSize="12"
                                                     HeightRequest="35"
                                                     CornerRadius="8"
-                                                    Clicked="OnOpenSpotifyClicked"
-                                                    CommandParameter="{Binding .}"/>
+                                                    Clicked="OnPausePreviewClicked"
+                                                    CommandParameter="{Binding .}"
+                                                    IsVisible="False"/>
                                         </HorizontalStackLayout>
                                     </Grid>
 
-                                </VerticalStackLayout>
-                            </Frame>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </RefreshView>
+                                    <!-- Mensaje sin preview -->
+                                    <Frame Grid.Column="0"
+                                           BackgroundColor="#2C3E50"
+                                           Padding="10"
+                                           CornerRadius="8"
+                                           IsVisible="{Binding PreviewUrl, Converter={StaticResource InvertedBoolConverter}}">
+                                        <Label Text="🎵 Preview no disponible"
+                                               FontSize="12"
+                                               TextColor="#F39C12"/>
+                                    </Frame>
 
-            <!-- Espacio extra al final para mejor scroll -->
-            <BoxView HeightRequest="20" BackgroundColor="Transparent"/>
+                                    <!-- Botones YouTube/Spotify, -->
+                                    <HorizontalStackLayout Grid.Column="1"
+                                                           Spacing="10"
+                                                           HorizontalOptions="End"
+                                                           VerticalOptions="Center">
+                                        <Button Text="▶ YouTube"
+                                                BackgroundColor="#FF0000"
+                                                TextColor="White"
+                                                FontSize="12"
+                                                HeightRequest="35"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenYouTubeClicked"
+                                                CommandParameter="{Binding .}"/>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                                        <Button Text="🎧 Spotify"
+                                                BackgroundColor="#1DB954"
+                                                TextColor="White"
+                                                FontSize="12"
+                                                HeightRequest="35"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenSpotifyClicked"
+                                                CommandParameter="{Binding .}"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
 </ContentPage>

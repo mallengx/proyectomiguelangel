@@ -43,7 +43,7 @@ namespace proyectomiguelangel
 
             try
             {
-                string apiKey = "86da83c67c096f77c2dd8706694f805a";
+                string apiKey = "8f59d4bdbcd67e09b6108d367ae3e45a";
                 string url = $"https://api.audd.io/findLyrics/?q={Uri.EscapeDataString(_searchText)}&api_token={apiKey}";
 
                 using HttpClient client = new HttpClient();

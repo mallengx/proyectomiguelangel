@@ -604,7 +604,7 @@ namespace proyectomiguelangel
                     await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
                 }
             }
-        }//
+        }
 
         protected override void OnDisappearing()
         {

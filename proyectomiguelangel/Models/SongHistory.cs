@@ -32,6 +32,6 @@ namespace proyectomiguelangel.Models
         public string Source { get; set; } // "AudioRecognition", "LyricsSearch"
 
         public string SearchQuery { get; set; } // Para búsquedas de letras
-       
+
     }
 }

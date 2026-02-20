@@ -34,7 +34,7 @@ namespace proyectomiguelangel
         private System.Timers.Timer _recordingTimer;
         private int _recordingSeconds = 0;
 
-        private const string AudDApiToken = "86da83c67c096f77c2dd8706694f805a";
+        private const string AudDApiToken = "8f59d4bdbcd67e09b6108d367ae3e45a";
 
         public AudioRecognitionPage()
         {
