@@ -6,20 +6,18 @@ using System.Net.Http.Json;
 using proyectomiguelangel.Services;
 using proyectomiguelangel.Models;
 using Microsoft.Maui.Controls;
-#if WINDOWS
-using NAudio.Wave;
-#endif
+
+// Eliminamos la referencia directa a NAudio aquí
+// Solo se usará condicionalmente en Windows
 
 namespace proyectomiguelangel
 {
     public partial class AudioRecognitionPage : ContentPage
     {
-#if WINDOWS
-        private WaveInEvent waveIn;
-        private WaveFileWriter writer;
-#endif
+        // Eliminamos las variables de NAudio del nivel de clase
+        // Ahora se manejarán solo dentro de regiones condicionales cuando sea necesario
 
-        private IAudioRecorder recorder;    // Android / iOS
+        private IAudioRecorder recorder;    // Android / iOS / Windows (usando Plugin.Maui.Audio)
         private IAudioManager audioManager = AudioManager.Current;
         private string _currentTitle;
         private string _currentArtist;
@@ -41,31 +39,7 @@ namespace proyectomiguelangel
             InitializeComponent();
             _httpClient = new HttpClient();
             _httpClient.Timeout = TimeSpan.FromSeconds(30);
-
-#if WINDOWS
-            InitializeAudioRecording();
-#endif
         }
-
-#if WINDOWS
-        private void InitializeAudioRecording()
-        {
-            try
-            {
-                waveIn = new WaveInEvent
-                {
-                    DeviceNumber = 0,
-                    WaveFormat = new WaveFormat(44100, 1)
-                };
-                waveIn.DataAvailable += OnDataAvailable;
-                waveIn.RecordingStopped += OnRecordingStopped;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error inicializando NAudio: {ex.Message}");
-            }
-        }
-#endif
 
         private async Task<(string cover, string preview)> SearchDeezerAsync(string title, string artist)
         {
@@ -84,7 +58,10 @@ namespace proyectomiguelangel
                             track.Preview ?? string.Empty);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en SearchDeezerAsync: {ex.Message}");
+            }
 
             return (string.Empty, string.Empty);
         }
@@ -127,7 +104,7 @@ namespace proyectomiguelangel
                     _hasResultShown = false;
                 }
 
-                // 🟢 SOLO PERMISO DE MICROFONO (Android 13/14)
+                // Permiso de micrófono para todas las plataformas
                 var micPermission = await Permissions.RequestAsync<Permissions.Microphone>();
                 if (micPermission != PermissionStatus.Granted)
                 {
@@ -135,15 +112,13 @@ namespace proyectomiguelangel
                     return;
                 }
 
-                // ✔ Archivo en carpeta segura
+                // Archivo en carpeta segura
                 _recordedFilePath = Path.Combine(FileSystem.CacheDirectory,
                     $"recording_{DateTime.Now:yyyyMMdd_HHmmss}.wav");
 
-#if WINDOWS
-                StartRecordingWindows();
-#else
-                await StartRecordingMobile();
-#endif
+                // Usar Plugin.Maui.Audio para todas las plataformas (incluyendo Windows)
+                // Esto evita la dependencia directa de NAudio en el código compartido
+                await StartRecordingWithPlugin();
 
                 StartRecordingTimer();
                 UpdateRecordingUI(true);
@@ -155,51 +130,22 @@ namespace proyectomiguelangel
             }
         }
 
-#if WINDOWS
-        private void StartRecordingWindows()
+        // Método unificado para iniciar grabación usando Plugin.Maui.Audio
+        private async Task StartRecordingWithPlugin()
         {
-            writer = new WaveFileWriter(_recordedFilePath, waveIn.WaveFormat);
-            waveIn.StartRecording();
-            isRecording = true;
-        }
-#else
-        private async Task StartRecordingMobile()
-        {
-            recorder = audioManager.CreateRecorder();
-
-            await recorder.StartAsync();
-            isRecording = true;
-        }
-#endif
-
-#if WINDOWS
-        private void OnDataAvailable(object sender, WaveInEventArgs e)
-        {
-            if (isRecording && writer != null)
+            try
             {
-                writer.Write(e.Buffer, 0, e.BytesRecorded);
-                writer.Flush();
+                recorder = audioManager.CreateRecorder();
+                await recorder.StartAsync();
+                isRecording = true;
+                System.Diagnostics.Debug.WriteLine("Grabación iniciada con Plugin.Maui.Audio");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al iniciar grabación: {ex.Message}");
+                throw;
             }
         }
-#endif
-
-#if WINDOWS
-        private async void OnRecordingStopped(object sender, StoppedEventArgs e)
-        {
-            writer?.Dispose();
-            writer = null;
-            isRecording = false;
-            StopRecordingTimer();
-
-            if (e.Exception != null)
-            {
-                await DisplayAlert("Error", e.Exception.Message, "OK");
-                return;
-            }
-
-            await ProcessAudioAfterStop();
-        }
-#endif
 
         private async void OnStopRecordingClicked(object sender, EventArgs e)
         {
@@ -214,26 +160,43 @@ namespace proyectomiguelangel
             StopRecordingButton.IsEnabled = false;
             RecordingStatusLabel.Text = "Analizando audio...";
 
-#if WINDOWS
-            waveIn?.StopRecording();
-#else
-            await StopRecordingMobile();
-            await ProcessAudioAfterStop();
-#endif
+            try
+            {
+                await StopRecordingWithPlugin();
+                await ProcessAudioAfterStop();
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"Error al detener grabación: {ex.Message}", "OK");
+                UpdateRecordingUI(false);
+            }
         }
 
-        private async Task StopRecordingMobile()
+        // Método unificado para detener grabación usando Plugin.Maui.Audio
+        private async Task StopRecordingWithPlugin()
         {
-            var resultSource = await recorder.StopAsync();
-
-            using (var input = resultSource.GetAudioStream())
-            using (var output = File.Create(_recordedFilePath))
+            try
             {
-                await input.CopyToAsync(output);
-            }
+                if (recorder == null || !isRecording)
+                    return;
 
-            isRecording = false;
-            StopRecordingTimer();
+                var resultSource = await recorder.StopAsync();
+
+                using (var input = resultSource.GetAudioStream())
+                using (var output = File.Create(_recordedFilePath))
+                {
+                    await input.CopyToAsync(output);
+                }
+
+                isRecording = false;
+                StopRecordingTimer();
+                System.Diagnostics.Debug.WriteLine($"Grabación guardada en: {_recordedFilePath}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al detener grabación: {ex.Message}");
+                throw;
+            }
         }
 
         private async Task ProcessAudioAfterStop()
@@ -245,6 +208,8 @@ namespace proyectomiguelangel
                 await DisplayAlert("Error", "No se grabó audio válido.", "OK");
                 return;
             }
+
+            System.Diagnostics.Debug.WriteLine($"Archivo de audio: {fileInfo.Length} bytes");
 
             var result = await RecognizeSongAsync(_recordedFilePath);
 
@@ -281,9 +246,13 @@ namespace proyectomiguelangel
                 var response = await _httpClient.PostAsync("https://api.audd.io/", content);
 
                 if (!response.IsSuccessStatusCode)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error en API: {response.StatusCode}");
                     return null;
+                }
 
                 var jsonString = await response.Content.ReadAsStringAsync();
+                System.Diagnostics.Debug.WriteLine($"Respuesta API: {jsonString}");
 
                 var options = new JsonSerializerOptions
                 {
@@ -292,8 +261,9 @@ namespace proyectomiguelangel
 
                 return JsonSerializer.Deserialize<AudDResponse>(jsonString, options);
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Error en RecognizeSongAsync: {ex.Message}");
                 return null;
             }
         }
@@ -319,25 +289,22 @@ namespace proyectomiguelangel
                 }
                 else
                 {
-                    CoverImage.Source = "default_album.png"; // Imagen por defecto
+                    CoverImage.Source = "default_album.png";
                 }
 
                 _previewUrl = deezer.preview;
 
-                // ✅ MOSTRAR BOTONES DE PREVIEW CORRECTAMENTE
+                // Mostrar botones de preview
                 if (!string.IsNullOrEmpty(_previewUrl))
                 {
                     PreviewPlayButton.IsVisible = true;
                     PreviewPauseButton.IsVisible = false;
-
-                    // También guardamos el preview en el objeto para el historial
                 }
                 else
                 {
                     PreviewPlayButton.IsVisible = false;
                     PreviewPauseButton.IsVisible = false;
 
-                    // Mostrar label de "Preview no disponible"
                     var noPreviewLabel = new Label
                     {
                         Text = "🎵 Preview no disponible",
@@ -347,7 +314,6 @@ namespace proyectomiguelangel
                         Margin = new Thickness(0, 5, 0, 0)
                     };
 
-                    // Buscar el HorizontalStackLayout y agregar el label
                     var parentLayout = PreviewPlayButton.Parent as HorizontalStackLayout;
                     if (parentLayout != null)
                     {
@@ -356,7 +322,7 @@ namespace proyectomiguelangel
                     }
                 }
 
-                // ✅ GUARDAR EN HISTORIAL (con preview URL)
+                // Guardar en historial
                 await SaveToHistory(result, deezer.cover, _previewUrl, "AudioRecognition");
             }
             catch (Exception ex)
@@ -423,13 +389,17 @@ namespace proyectomiguelangel
             try
             {
                 if (string.IsNullOrEmpty(_previewUrl))
+                {
+                    await DisplayAlert("Info", "No hay preview disponible", "OK");
                     return;
+                }
 
                 // Si ya existe y está pausado → continuar
                 if (_audioPlayer != null && !_isPreviewPlaying)
                 {
                     _audioPlayer.Play();
                     _isPreviewPlaying = true;
+                    PreviewPlayButton.IsVisible = false;
                     PreviewPauseButton.IsVisible = true;
                     return;
                 }
@@ -446,11 +416,12 @@ namespace proyectomiguelangel
                 _audioPlayer.Play();
 
                 _isPreviewPlaying = true;
+                PreviewPlayButton.IsVisible = false;
                 PreviewPauseButton.IsVisible = true;
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Error", ex.Message, "OK");
+                await DisplayAlert("Error", $"No se pudo reproducir: {ex.Message}", "OK");
             }
         }
 
@@ -466,6 +437,8 @@ namespace proyectomiguelangel
 
             _audioPlayer.Pause();
             _isPreviewPlaying = false;
+            PreviewPlayButton.IsVisible = true;
+            PreviewPauseButton.IsVisible = false;
         }
 
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
@@ -482,7 +455,14 @@ namespace proyectomiguelangel
             var query = Uri.EscapeDataString($"{_currentTitle} {_currentArtist}");
             var url = $"https://www.youtube.com/results?search_query={query}";
 
-            await Launcher.OpenAsync(url);
+            try
+            {
+                await Launcher.OpenAsync(url);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo abrir YouTube: {ex.Message}", "OK");
+            }
         }
 
         private async void OnOpenSpotifyClicked(object sender, EventArgs e)
@@ -506,7 +486,14 @@ namespace proyectomiguelangel
             catch
             {
                 // Fallback navegador
-                await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
+                try
+                {
+                    await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"No se pudo abrir Spotify: {ex.Message}", "OK");
+                }
             }
         }
 
@@ -523,8 +510,6 @@ namespace proyectomiguelangel
             try
             {
                 uint durationMs = (uint)duration;
-
-                // Animación de pulsación
                 await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
                 await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
             }
@@ -538,10 +523,15 @@ namespace proyectomiguelangel
         {
             base.OnDisappearing();
 
-#if WINDOWS
-            waveIn?.Dispose();
-            writer?.Dispose();
-#endif
+            // Limpiar recursos
+            if (isRecording)
+            {
+                try
+                {
+                    recorder?.StopAsync();
+                }
+                catch { }
+            }
 
             _audioPlayer?.Stop();
             _audioPlayer?.Dispose();
@@ -551,6 +541,7 @@ namespace proyectomiguelangel
         }
     }
 
+    // Modelos (sin cambios)
     public class AudDResponse
     {
         [JsonPropertyName("status")] public string Status { get; set; }
@@ -585,25 +576,22 @@ namespace proyectomiguelangel
         public string CoverMedium { get; set; }
     }
 
+    // Extensiones para animaciones (sin cambios)
     public static class ButtonExtensions
     {
         public static async Task AnimatePressAsync(this Button button, int duration = 100)
         {
             try
             {
-                // Convertir int a uint
                 uint durationMs = (uint)duration;
 
-                // Verificar que el botón esté disponible
                 if (button == null) return;
 
-                // Animación de pulsación con rebote
                 await button.ScaleTo(0.95, durationMs, Easing.CubicIn);
                 await button.ScaleTo(1, durationMs, Easing.SpringOut);
             }
             catch (Exception ex)
             {
-                // Registrar error sin interrumpir flujo
                 System.Diagnostics.Debug.WriteLine($"Error en animación: {ex.Message}");
             }
         }
@@ -617,11 +605,8 @@ namespace proyectomiguelangel
                 uint durationMs = (uint)duration;
                 var originalColor = button.BackgroundColor;
 
-                // Cambiar color durante la pulsación
                 button.BackgroundColor = pressedColor;
                 await button.ScaleTo(0.92, durationMs, Easing.CubicInOut);
-
-                // Restaurar
                 await button.ScaleTo(1, durationMs, Easing.CubicInOut);
                 button.BackgroundColor = originalColor;
             }
@@ -632,7 +617,6 @@ namespace proyectomiguelangel
         }
     }
 
-    // Extensión para ImageButton (opcional, si quieres método de extensión)
     public static class ImageButtonExtensions
     {
         public static async Task AnimatePressAsync(this ImageButton imageButton, int duration = 100)

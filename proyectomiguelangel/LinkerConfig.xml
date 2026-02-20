@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<linker>
+	<!-- Preservar tipos de Plugin.Maui.Audio -->
+	<assembly fullname="Plugin.Maui.Audio">
+		<type fullname="Plugin.Maui.Audio.AudioPlayer" preserve="all" />
+		<type fullname="Plugin.Maui.Audio.AudioRecorder" preserve="all" />
+		<type fullname="Plugin.Maui.Audio.AudioManager" preserve="all" />
+		<type fullname="Plugin.Maui.Audio.AudioPlayerImplementation" preserve="all" />
+		<type fullname="Plugin.Maui.Audio.AudioRecorderImplementation" preserve="all" />
+	</assembly>
+
+	<!-- Preservar SQLite -->
+	<assembly fullname="SQLite-net">
+		<type fullname="SQLite.SQLiteConnection" preserve="all" />
+		<type fullname="SQLite.TableQuery`1" preserve="all" />
+		<type fullname="SQLite.SQLiteCommand" preserve="all" />
+	</assembly>
+
+	<!-- Preservar Newtonsoft.Json -->
+	<assembly fullname="Newtonsoft.Json">
+		<type fullname="Newtonsoft.Json.JsonConvert" preserve="all" />
+		<type fullname="Newtonsoft.Json.JsonSerializerSettings" preserve="all" />
+	</assembly>
+
+	<!-- Preservar System.Text.Json -->
+	<assembly fullname="System.Text.Json">
+		<type fullname="System.Text.Json.JsonSerializer" preserve="all" />
+		<type fullname="System.Text.Json.JsonSerializerOptions" preserve="all" />
+	</assembly>
+
+	<!-- Preservar tipos de HttpClient -->
+	<assembly fullname="System.Net.Http">
+		<type fullname="System.Net.Http.HttpClient" preserve="all" />
+		<type fullname="System.Net.Http.HttpResponseMessage" preserve="all" />
+	</assembly>
+
+	<!-- Preservar tipos de la aplicación -->
+	<assembly fullname="proyectomiguelangel">
+		<namespace fullname="proyectomiguelangel" preserve="all" />
+		<namespace fullname="proyectomiguelangel.Models" preserve="all" />
+		<namespace fullname="proyectomiguelangel.Services" preserve="all" />
+		<namespace fullname="proyectomiguelangel.Converters" preserve="all" />
+	</assembly>
+</linker>
