@@ -33,7 +33,7 @@ namespace proyectomiguelangel
         private int _recordingSeconds = 0;
 
         private const string AudDApiToken = "8f59d4bdbcd67e09b6108d367ae3e45a";
-
+        private FavoriteSong _currentFavoriteSong;
         public AudioRecognitionPage()
         {
             InitializeComponent();
@@ -322,6 +322,11 @@ namespace proyectomiguelangel
                     }
                 }
 
+                // ============ NUEVO: COMPROBAR Y MOSTAR ESTADO DE FAVORITOS ============
+                // Verificar si la canción ya está en favoritos
+                await CheckIfFavoriteAsync(result.Title, result.Artist);
+                // =======================================================================
+
                 // Guardar en historial
                 await SaveToHistory(result, deezer.cover, _previewUrl, "AudioRecognition");
             }
@@ -330,7 +335,64 @@ namespace proyectomiguelangel
                 await DisplayAlert("Error", $"Error mostrando resultado: {ex.Message}", "OK");
             }
         }
+        private async Task CheckIfFavoriteAsync(string title, string artist)
+        {
+            try
+            {
+                var databaseService = new DatabaseService();
+                await databaseService.InitializeAsync();
 
+                bool isFavorite = await databaseService.IsFavoriteAsync(title, artist);
+
+                FavoriteButton.IsVisible = !isFavorite;
+                FavoriteAddedLabel.IsVisible = isFavorite;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error comprobando favorito: {ex.Message}");
+                FavoriteButton.IsVisible = true;
+                FavoriteAddedLabel.IsVisible = false;
+            }
+        }
+
+        // Nuevo método para añadir a favoritos
+        private async void OnAddToFavoritesClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            try
+            {
+                var favorite = new FavoriteSong
+                {
+                    Title = _currentTitle,
+                    Artist = _currentArtist,
+                    Album = AlbumLabel.Text,
+                    CoverUrl = CoverImage.Source?.ToString()?.Replace("Uri: ", "") ?? string.Empty,
+                    PreviewUrl = _previewUrl ?? string.Empty,
+                    AddedDate = DateTime.Now,
+                    Source = "AudioRecognition",
+                    SearchQuery = ""
+                };
+
+                var databaseService = new DatabaseService();
+                await databaseService.InitializeAsync();
+                await databaseService.AddToFavoritesAsync(favorite);
+
+                // Actualizar UI
+                FavoriteButton.IsVisible = false;
+                FavoriteAddedLabel.IsVisible = true;
+
+                await DisplayAlert("⭐ Añadido",
+                    $"'{_currentTitle}' ha sido añadido a tus favoritos", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error", $"No se pudo añadir a favoritos: {ex.Message}", "OK");
+            }
+        }
         private async Task SaveToHistory(AudDResult result, string coverUrl, string previewUrl, string source)
         {
             try

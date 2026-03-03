@@ -15,12 +15,24 @@ namespace proyectomiguelangel
         private string _searchText = string.Empty;
         private IAudioPlayer _audioPlayer;
         private bool _isAudioPlaying = false;
-
+        private readonly IDatabaseService _databaseService;
         public LyricsSearchPage()
         {
             InitializeComponent();
+            _databaseService = new DatabaseService();
+            _databaseService.InitializeAsync();
         }
-
+        private async Task InitializeDatabaseAsync()
+        {
+            try
+            {
+                await _databaseService.InitializeAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error inicializando DB: {ex.Message}");
+            }
+        }
         private async void OnBuscarClicked(object sender, EventArgs e)
         {
             // Animación del botón Buscar
@@ -380,7 +392,7 @@ namespace proyectomiguelangel
                         songResult.Album = deezerTrack.Album?.Title ?? string.Empty;
                     }
                 }
-
+                songResult.IsFavorite = await _databaseService.IsFavoriteAsync(songResult.Title, songResult.Artist);
                 return songResult;
             }
             catch (Exception ex)
@@ -389,7 +401,50 @@ namespace proyectomiguelangel
                 return songResult;
             }
         }
+        private async void OnAddToFavoritesClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.CommandParameter is SongResult song)
+            {
+                await button.AnimatePressAsync();
 
+                try
+                {
+                    var favorite = new FavoriteSong
+                    {
+                        Title = song.Title,
+                        Artist = song.Artist,
+                        Album = song.Album,
+                        CoverUrl = song.CoverArt,
+                        PreviewUrl = song.PreviewUrl,
+                        AddedDate = DateTime.Now,
+                        Source = "LyricsSearch",
+                        SearchQuery = _searchText
+                    };
+
+                    await _databaseService.AddToFavoritesAsync(favorite);
+
+                    // Actualizar UI
+                    song.IsFavorite = true;
+
+                    // Forzar actualización del binding
+                    var index = ListaResultados.ItemsSource.Cast<SongResult>().ToList().IndexOf(song);
+                    if (index >= 0)
+                    {
+                        var items = ListaResultados.ItemsSource.Cast<SongResult>().ToList();
+                        items[index] = song;
+                        ListaResultados.ItemsSource = null;
+                        ListaResultados.ItemsSource = items;
+                    }
+
+                    await DisplayAlert("⭐ Añadido",
+                        $"'{song.Title}' ha sido añadido a tus favoritos", "OK");
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"No se pudo añadir a favoritos: {ex.Message}", "OK");
+                }
+            }
+        }
         private async Task<DeezerTrack?> SearchDeezerTrack(string searchQuery)
         {
             try
@@ -801,5 +856,7 @@ namespace proyectomiguelangel
         public string LyricsBackgroundColor => HasExactMatch ? "#E8F5E8" : "#F5F5F5";
         public string LyricsBorderColor => HasExactMatch ? "#4CAF50" : "LightGray";
         public string LyricsTextColor => HasExactMatch ? "#1B5E20" : "#666666";
+        public bool IsFavorite { get; set; }
+
     }
 }

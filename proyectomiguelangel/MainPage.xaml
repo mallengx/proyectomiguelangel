@@ -19,6 +19,9 @@
         <!-- Pestaña 3: IA Transcripción -->
         <local:LyricsTranscriptionPage Title="📝 Transcribir" />
 
+        <!-- NUEVA PESTAÑA 4: Favoritos -->
+        <local:FavoritesPage Title="⭐ Favoritos" />
+
         <local:SongHistoryPage Title="📜 Historial" />
     </TabbedPage.Children>
 </TabbedPage>

@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:proyectomiguelangel.Converters"
+             x:Class="proyectomiguelangel.FavoritesPage"
+             Title="⭐ Favoritos"
+             BackgroundColor="#0F0B23">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <converters:SourceToIconConverter x:Key="SourceToIconConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Encabezado con contador -->
+        <Frame Grid.Row="0"
+               BackgroundColor="#1A173A"
+               Padding="15"
+               Margin="10,10,10,5"
+               CornerRadius="15"
+               BorderColor="#F1C40F">
+            <VerticalStackLayout Spacing="10">
+                <Label Text="⭐ Mis Canciones Favoritas"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#F1C40F"
+                       HorizontalOptions="Center"/>
+
+                <Grid ColumnDefinitions="*,*">
+                    <Label Grid.Column="0"
+                           Text="Total:"
+                           FontSize="14"
+                           TextColor="#BBBBBB"
+                           HorizontalOptions="End"/>
+
+                    <Label x:Name="CountLabel"
+                           Grid.Column="1"
+                           Text="0"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           TextColor="#F1C40F"
+                           HorizontalOptions="Start"
+                           Margin="10,0,0,0"/>
+                </Grid>
+            </VerticalStackLayout>
+        </Frame>
+
+        <!-- Lista de favoritos -->
+        <RefreshView Grid.Row="1"
+                     x:Name="RefreshView"
+                     Refreshing="OnRefresh"
+                     Margin="0,5,0,0">
+
+            <CollectionView x:Name="FavoritesCollectionView"
+                            ItemsSource="{Binding Favorites}"
+                            VerticalScrollBarVisibility="Always">
+
+                <CollectionView.EmptyView>
+                    <StackLayout HorizontalOptions="Center" 
+                                 VerticalOptions="Center"
+                                 Padding="40"
+                                 Spacing="20">
+                        <Label Text="⭐"
+                               FontSize="48"
+                               HorizontalOptions="Center" />
+                        <Label Text="No tienes canciones favoritas"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               TextColor="#FFFFFF"/>
+                        <Label Text="Las canciones que marques como favoritas aparecerán aquí"
+                               FontSize="14"
+                               HorizontalOptions="Center"
+                               TextColor="#BBBBBB"
+                               HorizontalTextAlignment="Center"/>
+                    </StackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame BackgroundColor="#1A173A" 
+                               Padding="15"
+                               CornerRadius="15"
+                               Margin="10,5,10,10"
+                               BorderColor="#F1C40F"
+                               HasShadow="True">
+                            <VerticalStackLayout Spacing="10">
+                                <!-- Encabezado con icono de fuente y fecha -->
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+                                    <Frame Grid.Column="0"
+                                           BackgroundColor="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='bgcolor'}"
+                                           Padding="8,3"
+                                           CornerRadius="12"
+                                           Margin="0,0,10,0"
+                                           HasShadow="False">
+                                        <Label Text="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='icon'}"
+                                               FontSize="12"
+                                               TextColor="#FFFFFF"/>
+                                    </Frame>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding AddedDate, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                           FontSize="11"
+                                           TextColor="#BBBBBB"
+                                           VerticalOptions="Center"/>
+
+                                    <!-- Botón eliminar de favoritos -->
+                                    <Button Grid.Column="3"
+                                            Text="❌"
+                                            FontSize="12"
+                                            BackgroundColor="Transparent"
+                                            TextColor="#F1C40F"
+                                            WidthRequest="30"
+                                            HeightRequest="30"
+                                            Clicked="OnRemoveFromFavoritesClicked"
+                                            CommandParameter="{Binding .}"/>
+                                </Grid>
+
+                                <!-- Contenido principal -->
+                                <Grid ColumnDefinitions="100,*"
+                                      RowDefinitions="Auto,Auto,Auto"
+                                      ColumnSpacing="15"
+                                      Margin="0,5,0,0">
+                                    <!-- Carátula -->
+                                    <Frame Grid.Row="0"
+                                           Grid.RowSpan="3"
+                                           Grid.Column="0"
+                                           Padding="0"
+                                           CornerRadius="10"
+                                           BackgroundColor="#2C3E50"
+                                           BorderColor="#F1C40F"
+                                           HeightRequest="100"
+                                           WidthRequest="100">
+                                        <Image HeightRequest="100"
+                                               WidthRequest="100"
+                                               Aspect="AspectFill">
+                                            <Image.Source>
+                                                <UriImageSource Uri="{Binding CoverUrl}" 
+                                                               CacheValidity="30:00:00:00" 
+                                                               CachingEnabled="True"/>
+                                            </Image.Source>
+                                        </Image>
+                                    </Frame>
+
+                                    <Label Grid.Row="0"
+                                           Grid.Column="1"
+                                           Text="{Binding Title}" 
+                                           FontSize="16" 
+                                           FontAttributes="Bold" 
+                                           TextColor="#FFFFFF"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <Label Grid.Row="1"
+                                           Grid.Column="1"
+                                           Text="{Binding Artist}"
+                                           FontSize="14"
+                                           TextColor="#F1C40F"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <Label Grid.Row="2"
+                                           Grid.Column="1"
+                                           Text="{Binding Album}"
+                                           FontSize="12"
+                                           TextColor="#BBBBBB"
+                                           LineBreakMode="TailTruncation"
+                                           IsVisible="{Binding Album, Converter={StaticResource StringToBoolConverter}}" />
+                                </Grid>
+
+                                <!-- Búsqueda original (solo para LyricsSearch) -->
+                                <Frame IsVisible="{Binding Source, Converter={StaticResource SourceToIconConverter}, ConverterParameter='showquery'}"
+                                       BackgroundColor="#2C3E50"
+                                       Padding="10"
+                                       CornerRadius="8"
+                                       Margin="0,5,0,0">
+                                    <Label Text="{Binding SearchQuery, StringFormat='🔍 Buscado: &quot;{0}&quot;'}"
+                                           FontSize="11"
+                                           TextColor="#F39C12"
+                                           LineBreakMode="WordWrap"/>
+                                </Frame>
+
+                                <!-- Controles de preview y enlaces -->
+                                <Grid ColumnDefinitions="*,*"
+                                      Margin="0,10,0,0">
+                                    <!-- Preview -->
+                                    <Grid Grid.Column="0"
+                                          IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+
+                                        <Label Grid.Row="0"
+                                               Text="🎧 Preview 30s"
+                                               FontSize="12"
+                                               TextColor="#BBBBBB"
+                                               Margin="0,0,0,5"/>
+
+                                        <HorizontalStackLayout Grid.Row="1"
+                                                               Spacing="10">
+                                            <Button Text="▶ Reproducir"
+                                                    BackgroundColor="#27AE60"
+                                                    TextColor="White"
+                                                    FontSize="12"
+                                                    HeightRequest="35"
+                                                    CornerRadius="8"
+                                                    Clicked="OnPlayPreviewClicked"
+                                                    CommandParameter="{Binding .}"/>
+
+                                            <Button Text="⏸ Pausa"
+                                                    BackgroundColor="#3498DB"
+                                                    TextColor="White"
+                                                    FontSize="12"
+                                                    HeightRequest="35"
+                                                    CornerRadius="8"
+                                                    Clicked="OnPausePreviewClicked"
+                                                    CommandParameter="{Binding .}"
+                                                    IsVisible="False"/>
+                                        </HorizontalStackLayout>
+                                    </Grid>
+
+                                    <!-- Sin preview -->
+                                    <Frame Grid.Column="0"
+                                           BackgroundColor="#2C3E50"
+                                           Padding="10"
+                                           CornerRadius="8"
+                                           IsVisible="{Binding PreviewUrl, Converter={StaticResource InvertedBoolConverter}}">
+                                        <Label Text="🎵 Preview no disponible"
+                                               FontSize="12"
+                                               TextColor="#F39C12"/>
+                                    </Frame>
+
+                                    <!-- YouTube/Spotify -->
+                                    <HorizontalStackLayout Grid.Column="1"
+                                                           Spacing="10"
+                                                           HorizontalOptions="End"
+                                                           VerticalOptions="Center">
+                                        <Button Text="▶ YouTube"
+                                                BackgroundColor="#FF0000"
+                                                TextColor="White"
+                                                FontSize="12"
+                                                HeightRequest="35"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenYouTubeClicked"
+                                                CommandParameter="{Binding .}"/>
+
+                                        <Button Text="🎧 Spotify"
+                                                BackgroundColor="#1DB954"
+                                                TextColor="White"
+                                                FontSize="12"
+                                                HeightRequest="35"
+                                                CornerRadius="8"
+                                                Clicked="OnOpenSpotifyClicked"
+                                                CommandParameter="{Binding .}"/>
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+    </Grid>
+</ContentPage>

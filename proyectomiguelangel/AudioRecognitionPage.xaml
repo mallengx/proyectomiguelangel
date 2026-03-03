@@ -115,35 +115,36 @@
                            FontSize="12"
                            TextColor="#BBBBBB" />
 
+                    <!-- Grid para carátula y preview -->
                     <Grid ColumnDefinitions="100,*"
-                          RowDefinitions="Auto,Auto"
-                          ColumnSpacing="15"
+                          RowDefinitions="Auto,Auto,Auto"  
+                        ColumnSpacing="15"
                           Margin="0,10,0,0">
 
-                        <!-- Carátula -->
+                        <!-- Carátula (ocupa 3 filas) -->
                         <Image x:Name="CoverImage"
                                Grid.Row="0"
-                               Grid.RowSpan="2"
-                               Grid.Column="0"
+                               Grid.RowSpan="3"  
+                            Grid.Column="0"
                                HeightRequest="100"
                                WidthRequest="100"
                                Aspect="AspectFill"
                                BackgroundColor="#2C3E50" />
 
-                        <!-- Texto preview -->
-                        <Label Grid.Row="0"
+                            <!-- Texto preview - Fila 0 -->
+                            <Label Grid.Row="0"
                                Grid.Column="1"
                                Text="🎧 Preview de 30 segundos"
                                FontSize="12"
                                TextColor="#BBBBBB" />
 
-                        <!-- Botón Preview -->
-                        <HorizontalStackLayout
+                            <!-- Botones Preview - Fila 1 -->
+                            <HorizontalStackLayout
                             Grid.Row="1"
                             Grid.Column="1"
                             Spacing="10">
 
-                            <Button x:Name="PreviewPlayButton"
+                                <Button x:Name="PreviewPlayButton"
                                     Text="▶ Reproducir"
                                     BackgroundColor="#27AE60"
                                     TextColor="White"
@@ -153,7 +154,7 @@
                                     IsVisible="False"
                                     Clicked="OnPlayPreviewClicked" />
 
-                            <Button x:Name="PreviewPauseButton"
+                                <Button x:Name="PreviewPauseButton"
                                     Text="⏸ Pausa"
                                     BackgroundColor="#3498DB"
                                     TextColor="White"
@@ -162,30 +163,56 @@
                                     CornerRadius="8"
                                     IsVisible="False"
                                     Clicked="OnPausePreviewClicked" />
-                        </HorizontalStackLayout>
+                            </HorizontalStackLayout>
+
+                            <!-- Botones Favoritos - Fila 2 (NUEVA FILA) -->
+                            <HorizontalStackLayout Grid.Row="2"
+                                               Grid.Column="1"
+                                               HorizontalOptions="Start" 
+                                               Spacing="10" 
+                                               Margin="0,5,0,0">
+                                <Button x:Name="FavoriteButton"
+                                    Text="⭐ Añadir a Favoritos"
+                                    BackgroundColor="#F1C40F"
+                                    TextColor="#1A173A"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    HeightRequest="40"
+                                    CornerRadius="8"
+                                    Clicked="OnAddToFavoritesClicked"
+                                    IsVisible="False"/>
+
+                                <Label x:Name="FavoriteAddedLabel"
+                                   Text="⭐ En Favoritos"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="#F1C40F"
+                                   IsVisible="False"
+                                   VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
                     </Grid>
 
+                    <!-- YouTube/Spotify -->
                     <HorizontalStackLayout Spacing="15"
-                       HorizontalOptions="Center"
-                       Margin="0,10,0,0">
-
+                                           HorizontalOptions="Center"
+                                           Margin="0,10,0,0">
                         <ImageButton x:Name="YouTubeButton"
-                 Source="youtube_icon.png" 
-                            BackgroundColor="#FF0000"
-                 HeightRequest="40"
-                 WidthRequest="120"
-                 CornerRadius="8"
-                 Aspect="AspectFit"
-                 Clicked="OnOpenYouTubeClicked" />
+                                     Source="youtube_icon.png" 
+                                     BackgroundColor="#FF0000"
+                                     HeightRequest="40"
+                                     WidthRequest="120"
+                                     CornerRadius="8"
+                                     Aspect="AspectFit"
+                                     Clicked="OnOpenYouTubeClicked" />
 
-                            <ImageButton x:Name="SpotifyButton"
-                 Source="spotify_icon.png"  
-                                BackgroundColor="#1DB954"
-                 HeightRequest="40"
-                 WidthRequest="120"
-                 CornerRadius="8"
-                 Aspect="AspectFit"
-                 Clicked="OnOpenSpotifyClicked" />
+                        <ImageButton x:Name="SpotifyButton"
+                                     Source="spotify_icon.png"  
+                                     BackgroundColor="#1DB954"
+                                     HeightRequest="40"
+                                     WidthRequest="120"
+                                     CornerRadius="8"
+                                     Aspect="AspectFit"
+                                     Clicked="OnOpenSpotifyClicked" />
                     </HorizontalStackLayout>
 
                 </VerticalStackLayout>

@@ -14,6 +14,11 @@ namespace proyectomiguelangel.Services
         Task<List<SongHistory>> GetHistoryAsync(int limit = 100);
         Task<bool> DeleteSongAsync(int id);
         Task<bool> ClearHistoryAsync();
+        Task<int> AddToFavoritesAsync(FavoriteSong song);
+        Task<bool> RemoveFromFavoritesAsync(int id);
+        Task<List<FavoriteSong>> GetFavoritesAsync();
+        Task<bool> IsFavoriteAsync(string title, string artist);
+        Task<FavoriteSong> GetFavoriteAsync(string title, string artist);
     }
 
     public class DatabaseService : IDatabaseService
@@ -34,6 +39,7 @@ namespace proyectomiguelangel.Services
                 SQLiteOpenFlags.Create | SQLiteOpenFlags.ReadWrite | SQLiteOpenFlags.SharedCache);
 
             await _database.CreateTableAsync<SongHistory>();
+            await _database.CreateTableAsync<FavoriteSong>();
         }
 
         public async Task InitializeAsync()
@@ -90,6 +96,54 @@ namespace proyectomiguelangel.Services
         {
             await Init();
             return await _database.DeleteAllAsync<SongHistory>() > 0;
+        }
+        public async Task<int> AddToFavoritesAsync(FavoriteSong favorite)
+        {
+            await Init();
+
+            // Verificar si ya existe en favoritos
+            var existing = await _database.Table<FavoriteSong>()
+                .Where(f => f.Title == favorite.Title && f.Artist == favorite.Artist)
+                .FirstOrDefaultAsync();
+
+            if (existing != null)
+            {
+                return existing.Id; // Ya existe
+            }
+
+            return await _database.InsertAsync(favorite);
+        }
+
+        public async Task<List<FavoriteSong>> GetFavoritesAsync()
+        {
+            await Init();
+            return await _database.Table<FavoriteSong>()
+                .OrderByDescending(f => f.AddedDate)
+                .ToListAsync();
+        }
+
+        public async Task<bool> RemoveFromFavoritesAsync(int id)
+        {
+            await Init();
+            return await _database.DeleteAsync<FavoriteSong>(id) > 0;
+        }
+
+        public async Task<bool> IsFavoriteAsync(string title, string artist)
+        {
+            await Init();
+            var existing = await _database.Table<FavoriteSong>()
+                .Where(f => f.Title == title && f.Artist == artist)
+                .FirstOrDefaultAsync();
+
+            return existing != null;
+        }
+
+        public async Task<FavoriteSong> GetFavoriteAsync(string title, string artist)
+        {
+            await Init();
+            return await _database.Table<FavoriteSong>()
+                .Where(f => f.Title == title && f.Artist == artist)
+                .FirstOrDefaultAsync();
         }
     }
 }

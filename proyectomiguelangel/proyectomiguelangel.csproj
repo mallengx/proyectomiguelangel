@@ -118,6 +118,9 @@
 		<MauiXaml Update="AudioRecognitionPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
+		<MauiXaml Update="FavoritesPage.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</MauiXaml>
 		<MauiXaml Update="LyricsSearchPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
