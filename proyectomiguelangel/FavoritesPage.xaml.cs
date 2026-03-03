@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+Ôªøusing System.Collections.ObjectModel;
 using Plugin.Maui.Audio;
 using proyectomiguelangel.Models;
 using proyectomiguelangel.Services;
@@ -55,6 +55,9 @@ namespace proyectomiguelangel
 
                 // Limpiar diccionario de botones al recargar
                 _songButtons.Clear();
+
+                // Refrescar previews expirados en segundo plano
+                _ = Task.Run(async () => await RefreshExpiredFavoritesAsync());
             }
             catch (Exception ex)
             {
@@ -77,7 +80,7 @@ namespace proyectomiguelangel
             RefreshView.IsRefreshing = false;
         }
 
-        // ============ M…TODOS DE REPRODUCCI”N ============
+        // ============ M√âTODOS DE REPRODUCCI√ìN ============
 
         public void RegisterSongButtons(int songId, Button playButton, Button pauseButton)
         {
@@ -142,28 +145,34 @@ namespace proyectomiguelangel
 
                 try
                 {
-                    button.Text = "?";
+                    // Mostrar indicador de carga
+                    button.Text = "‚è≥";
                     button.IsEnabled = false;
 
-                    string validPreviewUrl = await _previewRefreshService.GetValidPreviewUrlAsync(
-                        new SongHistory
-                        {
-                            Title = song.Title,
-                            Artist = song.Artist,
-                            PreviewUrl = song.PreviewUrl
-                        });
+                    // USAR EL NUEVO M√âTODO QUE ACEPTA FAVORITESONG
+                    string validPreviewUrl = await _previewRefreshService.GetValidPreviewUrlAsync(song);
 
-                    button.Text = "? Reproducir";
+                    button.Text = "‚ñ∂ Reproducir";
                     button.IsEnabled = true;
 
                     if (string.IsNullOrEmpty(validPreviewUrl))
                     {
                         await DisplayAlert("Preview no disponible",
-                            "No se pudo obtener un preview v·lido para esta canciÛn.", "OK");
+                            "No se pudo obtener un preview v√°lido para esta canci√≥n.", "OK");
+
+                        // Ocultar botones si no hay preview
+                        if (button.Parent is HorizontalStackLayout parent)
+                        {
+                            button.IsVisible = false;
+                            var pauseBtn = parent.Children.OfType<Button>()
+                                .FirstOrDefault(b => b.Text.Contains("Pausa"));
+                            if (pauseBtn != null)
+                                pauseBtn.IsVisible = false;
+                        }
                         return;
                     }
 
-                    // Buscar botÛn de pausa
+                    // Buscar bot√≥n de pausa
                     Button foundPauseButton = null;
                     if (button.Parent is HorizontalStackLayout parentLayout)
                     {
@@ -176,7 +185,7 @@ namespace proyectomiguelangel
                         }
                     }
 
-                    // Si hay otra canciÛn reproduciÈndose, detenerla
+                    // Si hay otra canci√≥n reproduci√©ndose, detenerla
                     if (_currentPlayingSong != null && _currentPlayingSong.Id != song.Id)
                     {
                         StopAudio();
@@ -186,14 +195,14 @@ namespace proyectomiguelangel
                         }
                     }
 
-                    // Si estamos reproduciendo la misma canciÛn, pausar
+                    // Si estamos reproduciendo la misma canci√≥n, pausar
                     if (_currentPlayingSong?.Id == song.Id && _isPreviewPlaying)
                     {
                         OnPausePreviewClicked(sender, e);
                         return;
                     }
 
-                    // Si tenemos el player pausado de la misma canciÛn, reanudar
+                    // Si tenemos el player pausado de la misma canci√≥n, reanudar
                     if (_audioPlayer != null && !_isPreviewPlaying && _currentPlayingSong?.Id == song.Id)
                     {
                         _audioPlayer.Play();
@@ -202,7 +211,7 @@ namespace proyectomiguelangel
                         return;
                     }
 
-                    // Nueva reproducciÛn
+                    // Nueva reproducci√≥n
                     _audioPlayer?.Stop();
                     _audioPlayer?.Dispose();
 
@@ -219,13 +228,21 @@ namespace proyectomiguelangel
 
                     UpdatePlaybackState(song.Id, true);
                 }
+                catch (HttpRequestException ex) when (ex.Message.Contains("403"))
+                {
+                    await DisplayAlert("Preview expirado",
+                        "El preview de esta canci√≥n ha expirado.", "OK");
+
+                    // Intentar refrescar el preview
+                    await _previewRefreshService.RefreshPreviewUrlAsync(song.Title, song.Artist);
+                }
                 catch (Exception ex)
                 {
                     await DisplayAlert("Error", $"No se pudo reproducir: {ex.Message}", "OK");
                 }
                 finally
                 {
-                    button.Text = "? Reproducir";
+                    button.Text = "‚ñ∂ Reproducir";
                     button.IsEnabled = true;
                 }
             }
@@ -278,8 +295,45 @@ namespace proyectomiguelangel
             _currentPlayingSong = null;
         }
 
-        // ============ M…TODOS CRUD DE FAVORITOS ============
+        // ============ M√âTODOS CRUD DE FAVORITOS ============
+        private async Task RefreshExpiredFavoritesAsync()
+        {
+            try
+            {
+                var favoritesToCheck = Favorites.Where(f => !string.IsNullOrEmpty(f.PreviewUrl)).ToList();
 
+                foreach (var fav in favoritesToCheck)
+                {
+                    bool isValid = await _previewRefreshService.IsPreviewUrlValidAsync(fav.PreviewUrl);
+
+                    if (!isValid)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"üîÑ Refrescando preview para favorito: {fav.Title}");
+                        var newPreview = await _previewRefreshService.RefreshPreviewUrlAsync(fav.Title, fav.Artist);
+
+                        if (!string.IsNullOrEmpty(newPreview) && newPreview != fav.PreviewUrl)
+                        {
+                            fav.PreviewUrl = newPreview;
+                            await _databaseService.AddToFavoritesAsync(fav); // Actualizar en BD
+
+                            // Actualizar UI
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                var index = Favorites.IndexOf(fav);
+                                if (index >= 0)
+                                {
+                                    Favorites[index] = fav;
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en refresh de favoritos: {ex.Message}");
+            }
+        }
         private async void OnRemoveFromFavoritesClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is FavoriteSong song)
@@ -287,7 +341,7 @@ namespace proyectomiguelangel
                 await button.AnimatePressAsync();
 
                 bool confirm = await DisplayAlert("Eliminar de favoritos",
-                    $"øQuitar '{song.Title}' de tus favoritos?", "SÌ", "No");
+                    $"¬øQuitar '{song.Title}' de tus favoritos?", "S√≠", "No");
 
                 if (confirm)
                 {
@@ -302,13 +356,13 @@ namespace proyectomiguelangel
                         Favorites.Remove(song);
                         UpdateCountLabel();
 
-                        await DisplayAlert("? Eliminado", "CanciÛn eliminada de favoritos", "OK");
+                        await DisplayAlert("? Eliminado", "Canci√≥n eliminada de favoritos", "OK");
                     }
                 }
             }
         }
 
-        // ============ M…TODOS YOUTUBE/SPOTIFY ============
+        // ============ M√âTODOS YOUTUBE/SPOTIFY ============
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is FavoriteSong song)

@@ -108,7 +108,19 @@ namespace proyectomiguelangel.Services
 
             if (existing != null)
             {
-                return existing.Id; // Ya existe
+                // Actualizar el preview si es diferente
+                if (!string.IsNullOrEmpty(favorite.PreviewUrl) &&
+                    favorite.PreviewUrl != existing.PreviewUrl)
+                {
+                    existing.PreviewUrl = favorite.PreviewUrl;
+                }
+
+                // Actualizar otros campos si es necesario
+                existing.CoverUrl = favorite.CoverUrl;
+                existing.Album = favorite.Album;
+
+                await _database.UpdateAsync(existing);
+                return existing.Id;
             }
 
             return await _database.InsertAsync(favorite);

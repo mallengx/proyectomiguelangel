@@ -66,7 +66,36 @@ namespace proyectomiguelangel.Services
                 return false;
             }
         }
+        public async Task<string> GetValidPreviewUrlAsync(FavoriteSong favorite)
+        {
+            // Si no hay preview, no podemos hacer nada
+            if (string.IsNullOrEmpty(favorite.PreviewUrl))
+                return null;
 
+            // Verificar si el preview actual es válido
+            bool isValid = await IsPreviewUrlValidAsync(favorite.PreviewUrl);
+
+            if (isValid)
+            {
+                System.Diagnostics.Debug.WriteLine($"✅ Preview válido para favorito: {favorite.Title}");
+                return favorite.PreviewUrl;
+            }
+
+            // Si está expirado, intentar refrescar
+            System.Diagnostics.Debug.WriteLine($"⚠️ Preview expirado para favorito: {favorite.Title}, refrescando...");
+
+            var newPreviewUrl = await RefreshPreviewUrlAsync(favorite.Title, favorite.Artist);
+
+            if (!string.IsNullOrEmpty(newPreviewUrl) && newPreviewUrl != favorite.PreviewUrl)
+            {
+                // Actualizar en la base de datos de favoritos
+                favorite.PreviewUrl = newPreviewUrl;
+                await _databaseService.AddToFavoritesAsync(favorite); // AddToFavoritesAsync ya maneja actualizaciones
+                System.Diagnostics.Debug.WriteLine($"✅ Preview actualizado en BD de favoritos para: {favorite.Title}");
+            }
+
+            return newPreviewUrl;
+        }
         /// <summary>
         /// Actualiza el preview en la base de datos si es necesario
         /// </summary>
