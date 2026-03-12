@@ -316,23 +316,23 @@
                                                            Spacing="10"
                                                            HorizontalOptions="End"
                                                            VerticalOptions="Center">
-                                        <Button Text="▶ YouTube"
-                                                BackgroundColor="#FF0000"
-                                                TextColor="White"
-                                                FontSize="12"
-                                                HeightRequest="35"
-                                                CornerRadius="8"
-                                                Clicked="OnOpenYouTubeClicked"
-                                                CommandParameter="{Binding .}"/>
+                                        <ImageButton Source="youtube_icon.png"
+                 BackgroundColor="#FF0000"
+                 HeightRequest="40"
+                 WidthRequest="120"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenYouTubeClicked"
+                 CommandParameter="{Binding .}" />
 
-                                        <Button Text="🎧 Spotify"
-                                                BackgroundColor="#1DB954"
-                                                TextColor="White"
-                                                FontSize="12"
-                                                HeightRequest="35"
-                                                CornerRadius="8"
-                                                Clicked="OnOpenSpotifyClicked"
-                                                CommandParameter="{Binding .}"/>
+                                        <ImageButton Source="spotify_icon.png"
+                 BackgroundColor="#1DB954"
+                 HeightRequest="40"
+                 WidthRequest="120"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenSpotifyClicked"
+                 CommandParameter="{Binding .}" />
                                     </HorizontalStackLayout>
                                 </Grid>
                             </VerticalStackLayout>

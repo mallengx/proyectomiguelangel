@@ -568,9 +568,9 @@ namespace proyectomiguelangel
         // ============ MÉTODOS YOUTUBE/SPOTIFY ============
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is SongHistory song)
+            if (sender is ImageButton imageButton && imageButton.CommandParameter is SongHistory song)
             {
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
 
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
@@ -583,11 +583,12 @@ namespace proyectomiguelangel
             }
         }
 
+
         private async void OnOpenSpotifyClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is SongHistory song)
+            if (sender is ImageButton imageButton && imageButton.CommandParameter is SongHistory song)
             {
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
 
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
@@ -603,6 +604,19 @@ namespace proyectomiguelangel
                 {
                     await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
                 }
+            }
+        }
+        private async Task AnimateImageButtonAsync(ImageButton imageButton, int duration = 100)
+        {
+            try
+            {
+                uint durationMs = (uint)duration;
+                await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error animando ImageButton: {ex.Message}");
             }
         }
 

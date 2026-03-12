@@ -64,7 +64,19 @@ namespace proyectomiguelangel
                 await DisplayAlert("Error", $"No se pudieron cargar los favoritos: {ex.Message}", "OK");
             }
         }
-
+        private async Task AnimateImageButtonAsync(ImageButton imageButton, int duration = 100)
+        {
+            try
+            {
+                uint durationMs = (uint)duration;
+                await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error animando ImageButton: {ex.Message}");
+            }
+        }
         private void UpdateCountLabel()
         {
             if (CountLabel != null)
@@ -365,9 +377,9 @@ namespace proyectomiguelangel
         // ============ MÉTODOS YOUTUBE/SPOTIFY ============
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is FavoriteSong song)
+            if (sender is ImageButton imageButton && imageButton.CommandParameter is FavoriteSong song)
             {
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
 
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
@@ -379,12 +391,11 @@ namespace proyectomiguelangel
                 await Launcher.OpenAsync(url);
             }
         }
-
         private async void OnOpenSpotifyClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is FavoriteSong song)
+            if (sender is ImageButton imageButton && imageButton.CommandParameter is FavoriteSong song)
             {
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
 
                 if (string.IsNullOrWhiteSpace(song.Title) ||
                     string.IsNullOrWhiteSpace(song.Artist))
@@ -403,6 +414,7 @@ namespace proyectomiguelangel
             }
         }
 
+
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
@@ -412,7 +424,7 @@ namespace proyectomiguelangel
     }
 
     // Extensiones para animaciones
-   
-        
-    
+
+
+
 }
