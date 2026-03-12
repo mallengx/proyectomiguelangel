@@ -7,10 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "proyectomiguelangel", "proy
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{961B19B6-5791-468E-9527-F4073A2BC62E}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "proyectomiguelangelexe", "proyectomiguelangelexe\proyectomiguelangelexe.vdproj", "{91867975-0304-4BE9-AEFC-96735498ABDC}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Pcexe", "Pcexe\Pcexe.vdproj", "{9E6A54CF-5E36-4315-9513-A1168C593B32}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +19,6 @@ Global
 		{D5D4A9F1-AC6C-4051-B908-410B64D4CF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5D4A9F1-AC6C-4051-B908-410B64D4CF49}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D5D4A9F1-AC6C-4051-B908-410B64D4CF49}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{91867975-0304-4BE9-AEFC-96735498ABDC}.Debug|Any CPU.ActiveCfg = Debug
-		{91867975-0304-4BE9-AEFC-96735498ABDC}.Release|Any CPU.ActiveCfg = Release
-		{9E6A54CF-5E36-4315-9513-A1168C593B32}.Debug|Any CPU.ActiveCfg = Debug
-		{9E6A54CF-5E36-4315-9513-A1168C593B32}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
@@ -10,19 +9,16 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-
 		<ApplicationTitle>proyectomiguelangel</ApplicationTitle>
 		<ApplicationId>com.companyname.proyectomiguelangel</ApplicationId>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
-
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">13.1</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
-
 	<!-- Configuración específica para RELEASE en Android -->
 	<PropertyGroup Condition="'$(Configuration)' == 'Release' AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<!-- Deshabilitar AOT problemático -->
@@ -30,7 +26,6 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 		<EnableLLVM>false</EnableLLVM>
 		<AndroidEnableProfiledAot>false</AndroidEnableProfiledAot>
-
 		<!-- Optimizaciones seguras -->
 		<AndroidLinkMode>SdkOnly</AndroidLinkMode>
 		<AndroidLinkTool>r8</AndroidLinkTool>
@@ -41,54 +36,45 @@
 		<AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
 		<AndroidPackageFormat>apk</AndroidPackageFormat>
 	</PropertyGroup>
-
 	<!-- Configuración específica para RELEASE en Windows -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
 		<RuntimeIdentifier>win10-x64</RuntimeIdentifier>
 	</PropertyGroup>
-
 	<!-- ABIs soportadas para Android -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
 		<RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
 		<AndroidSupportedAbis>armeabi-v7a;arm64-v8a;x86;x86_64</AndroidSupportedAbis>
 	</PropertyGroup>
-
 	<!-- Paquetes comunes para todas las plataformas -->
 	<ItemGroup>
 		<!-- Paquetes Maui esenciales -->
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-
 		<!-- Utilidades comunes -->
 		<PackageReference Include="CommunityToolkit.Maui" Version="8.0.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="System.Text.Json" Version="8.0.4" />
-
 		<!-- Audio multiplataforma -->
 		<PackageReference Include="Plugin.Maui.Audio" Version="3.0.0" />
 	</ItemGroup>
-
 	<!-- Paquetes SOLO para Windows -->
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="NAudio.Flac" Version="1.0.5702.29018" />
 		<PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
 	</ItemGroup>
-
 	<!-- Excluir NAudio explícitamente de plataformas no Windows -->
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
 		<PackageReference Remove="NAudio" />
 		<PackageReference Remove="NAudio.Flac" />
 		<PackageReference Remove="NAudio.Wasapi" />
 	</ItemGroup>
-
 	<!-- Archivo de configuración del linker para Release -->
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<LinkerDescriptor Include="LinkerConfig.xml" />
 	</ItemGroup>
-
 	<!-- Recursos Maui -->
 	<ItemGroup>
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#64B5F6" />
@@ -98,28 +84,25 @@
 		<MauiFont Include="Resources\Fonts\*" />
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
-
 	<!-- Archivos que no deben incluirse como recursos -->
 	<ItemGroup>
 		<None Remove="Resources\Images\spotify_icon.png" />
 		<None Remove="Resources\Images\youtube_icon.png" />
 		<None Remove="Resources\Raw\la_oreja_de_van_gogh___rosas_vdeo_oficial (mp3cut.net).wav" />
 	</ItemGroup>
-
 	<!-- Assets condicionales -->
 	<ItemGroup>
 		<MauiAsset Update="Resources\Raw\la_oreja_de_van_gogh___rosas_vdeo_oficial %28mp3cut.net%29.wav">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</MauiAsset>
 	</ItemGroup>
-
 	<!-- Archivos XAML -->
 	<ItemGroup>
 		<MauiXaml Update="AudioRecognitionPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="FavoritesPage.xaml">
-		  <Generator>MSBuild:Compile</Generator>
+			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 		<MauiXaml Update="LyricsSearchPage.xaml">
 			<Generator>MSBuild:Compile</Generator>
@@ -131,5 +114,4 @@
 			<Generator>MSBuild:Compile</Generator>
 		</MauiXaml>
 	</ItemGroup>
-
 </Project>

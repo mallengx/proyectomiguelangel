@@ -14,6 +14,8 @@ namespace proyectomiguelangel
         private SongResult _currentPlayingSong;
         private string _searchText = string.Empty;
         private IAudioPlayer _audioPlayer;
+        private string _currentTitle;
+        private string _currentArtist;
         private bool _isAudioPlaying = false;
         private readonly IDatabaseService _databaseService;
         public LyricsSearchPage()
@@ -55,7 +57,7 @@ namespace proyectomiguelangel
 
             try
             {
-                string apiKey = "8f59d4bdbcd67e09b6108d367ae3e45a";
+                string apiKey = "7e0915faff9bcfa94f8ba45cb977faac";
                 string url = $"https://api.audd.io/findLyrics/?q={Uri.EscapeDataString(_searchText)}&api_token={apiKey}";
 
                 using HttpClient client = new HttpClient();
@@ -757,106 +759,164 @@ namespace proyectomiguelangel
 
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is SongResult song)
+            // Animación del botón
+            if (sender is ImageButton imageButton)
             {
-                // Animación del botón
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
+            }
 
-                await Launcher.OpenAsync(song.YouTubeUrl);
+            // Obtener la canción del CommandParameter
+            if (sender is ImageButton btn && btn.CommandParameter is SongResult song)
+            {
+                if (string.IsNullOrWhiteSpace(song.Title) || string.IsNullOrWhiteSpace(song.Artist))
+                    return;
+
+                var query = Uri.EscapeDataString($"{song.Title} {song.Artist}");
+                var url = $"https://www.youtube.com/results?search_query={query}";
+
+                try
+                {
+                    await Launcher.OpenAsync(url);
+                }
+                catch (Exception ex)
+                {
+                    await DisplayAlert("Error", $"No se pudo abrir YouTube: {ex.Message}", "OK");
+                }
             }
         }
+
+
 
         private async void OnOpenSpotifyClicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.CommandParameter is SongResult song)
+            // Animación del botón
+            if (sender is ImageButton imageButton)
             {
-                // Animación del botón
-                await button.AnimatePressAsync();
+                await AnimateImageButtonAsync(imageButton);
+            }
 
-                await Launcher.OpenAsync(song.SpotifyUrl);
+            // Obtener la canción del CommandParameter
+            if (sender is ImageButton btn && btn.CommandParameter is SongResult song)
+            {
+                if (string.IsNullOrWhiteSpace(song.Title) || string.IsNullOrWhiteSpace(song.Artist))
+                    return;
+
+                var query = Uri.EscapeDataString($"{song.Title} {song.Artist}");
+
+                try
+                {
+                    // Intenta abrir la app de Spotify
+                    await Launcher.OpenAsync($"spotify:search:{query}");
+                }
+                catch
+                {
+                    // Fallback navegador
+                    try
+                    {
+                        await Launcher.OpenAsync($"https://open.spotify.com/search/{query}");
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Error", $"No se pudo abrir Spotify: {ex.Message}", "OK");
+                    }
+                }
             }
         }
-    }
+        private async Task AnimateImageButtonAsync(ImageButton imageButton, int duration = 100)
+        {
+            try
+            {
+                uint durationMs = (uint)duration;
+                await imageButton.ScaleTo(0.95, durationMs, Easing.CubicIn);
+                await imageButton.ScaleTo(1, durationMs, Easing.SpringOut);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error animando ImageButton: {ex.Message}");
+            }
+        }
 
-    // Modelos
-    public class AuddLyricsResponse
-    {
-        public string Status { get; set; } = string.Empty;
-        public List<LyricsResult> Result { get; set; } = new List<LyricsResult>();
-    }
 
-    public class LyricsResult
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
-        public string Lyrics { get; set; } = string.Empty;
-        public string Album { get; set; } = string.Empty;
-    }
+        // Modelos
+        public class AuddLyricsResponse
+        {
+            public string Status { get; set; } = string.Empty;
+            public List<LyricsResult> Result { get; set; } = new List<LyricsResult>();
+        }
 
-    public class DeezerResponse
-    {
-        public List<DeezerTrack> Data { get; set; } = new List<DeezerTrack>();
-        public int Total { get; set; }
-    }
+        public class LyricsResult
+        {
+            public string Title { get; set; } = string.Empty;
+            public string Artist { get; set; } = string.Empty;
+            public string Lyrics { get; set; } = string.Empty;
+            public string Album { get; set; } = string.Empty;
+        }
 
-    public class DeezerTrack
-    {
-        public long Id { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Title_Short { get; set; } = string.Empty;
-        public DeezerArtist Artist { get; set; } = new DeezerArtist();
-        public DeezerAlbum Album { get; set; } = new DeezerAlbum();
-        public string Preview { get; set; } = string.Empty;
-        public int Duration { get; set; }
-    }
+        public class DeezerResponse
+        {
+            public List<DeezerTrack> Data { get; set; } = new List<DeezerTrack>();
+            public int Total { get; set; }
+        }
 
-    public class DeezerArtist
-    {
-        public string Name { get; set; } = string.Empty;
-    }
+        public class DeezerTrack
+        {
+            public long Id { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string Title_Short { get; set; } = string.Empty;
+            public DeezerArtist Artist { get; set; } = new DeezerArtist();
+            public DeezerAlbum Album { get; set; } = new DeezerAlbum();
+            public string Preview { get; set; } = string.Empty;
+            public int Duration { get; set; }
+        }
 
-    public class DeezerAlbum
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Cover { get; set; } = string.Empty;
-        public string CoverSmall { get; set; } = string.Empty;
-        public string CoverMedium { get; set; } = string.Empty;
-        public string CoverBig { get; set; } = string.Empty;
-        public string CoverXl { get; set; } = string.Empty;
-    }
+        public class DeezerArtist
+        {
+            public string Name { get; set; } = string.Empty;
+        }
 
-    public class SongResult
-    {
-        public string Title { get; set; } = string.Empty;
-        public string Artist { get; set; } = string.Empty;
-        public string Lyrics { get; set; } = string.Empty;
-        public string Album { get; set; } = string.Empty;
-        public string CoverArt { get; set; } = string.Empty;
-        public string PreviewUrl { get; set; } = string.Empty;
-        public string DeezerId { get; set; } = string.Empty;
+        public class DeezerAlbum
+        {
+            public string Title { get; set; } = string.Empty;
+            public string Cover { get; set; } = string.Empty;
+            public string CoverSmall { get; set; } = string.Empty;
+            public string CoverMedium { get; set; } = string.Empty;
+            public string CoverBig { get; set; } = string.Empty;
+            public string CoverXl { get; set; } = string.Empty;
+        }
 
-        // Nuevas propiedades para la visualización
-        public string DisplayLyrics { get; set; } = string.Empty;
-        public bool HasExactMatch { get; set; }
-        public int LyricsMatchPosition { get; set; } = -1;
-        public double EstimatedStartTime { get; set; }
+        public class SongResult
+        {
+            public string Title { get; set; } = string.Empty;
+            public string Artist { get; set; } = string.Empty;
+            public string Lyrics { get; set; } = string.Empty;
+            public string Album { get; set; } = string.Empty;
+            public string CoverArt { get; set; } = string.Empty;
+            public string PreviewUrl { get; set; } = string.Empty;
+            public string DeezerId { get; set; } = string.Empty;
 
-        // NUEVA PROPIEDAD para texto formateado con resaltado
-        public FormattedString FormattedLyrics { get; set; } = new FormattedString();
-        // 🎧 Enlaces externos (GENERADOS AUTOMÁTICAMENTE)
-        public string YouTubeUrl =>
-            $"https://www.youtube.com/results?search_query={Uri.EscapeDataString($"{Title} {Artist}")}";
+            // Nuevas propiedades para la visualización
+            public string DisplayLyrics { get; set; } = string.Empty;
+            public bool HasExactMatch { get; set; }
+            public int LyricsMatchPosition { get; set; } = -1;
+            public double EstimatedStartTime { get; set; }
 
-        public string SpotifyUrl =>
-            $"https://open.spotify.com/search/{Uri.EscapeDataString($"{Title} {Artist}")}";
+            // NUEVA PROPIEDAD para texto formateado con resaltado
+            public FormattedString FormattedLyrics { get; set; } = new FormattedString();
+            // 🎧 Enlaces externos (GENERADOS AUTOMÁTICAMENTE)
+            public string YouTubeUrl =>
+                $"https://www.youtube.com/results?search_query={Uri.EscapeDataString($"{Title} {Artist}")}";
 
-        // Propiedades calculadas para binding
-        public string PlayButtonText => HasExactMatch ? "▶ Desde letra" : "▶ Preview";
-        public string PlayButtonColor => HasExactMatch ? "#FF9800" : "#4CAF50";
-        public string LyricsBackgroundColor => HasExactMatch ? "#E8F5E8" : "#F5F5F5";
-        public string LyricsBorderColor => HasExactMatch ? "#4CAF50" : "LightGray";
-        public string LyricsTextColor => HasExactMatch ? "#1B5E20" : "#666666";
-        public bool IsFavorite { get; set; }
+            public string SpotifyUrl =>
+                $"https://open.spotify.com/search/{Uri.EscapeDataString($"{Title} {Artist}")}";
 
+            // Propiedades calculadas para binding
+            public string PlayButtonText => HasExactMatch ? "▶ Desde letra" : "▶ Preview";
+            public string PlayButtonColor => HasExactMatch ? "#FF9800" : "#4CAF50";
+            public string LyricsBackgroundColor => HasExactMatch ? "#E8F5E8" : "#F5F5F5";
+            public string LyricsBorderColor => HasExactMatch ? "#4CAF50" : "LightGray";
+            public string LyricsTextColor => HasExactMatch ? "#1B5E20" : "#666666";
+            public bool IsFavorite { get; set; }
+
+        }
     }
 }
