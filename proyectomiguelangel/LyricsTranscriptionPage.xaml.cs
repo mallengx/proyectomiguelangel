@@ -89,7 +89,7 @@ namespace proyectomiguelangel
                 var guessedLanguage = GuessLanguageFromFilename(fileName);
                 if (guessedLanguage != null)
                 {
-                    SelectedFileLabel.Text += $"\n🎯 Idioma sugerido: {guessedLanguage}";
+                    SelectedFileLabel.Text += $"\n Idioma sugerido: {guessedLanguage}";
                 }
 
                 // Información del archivo (AHORA funciona en Android)
@@ -103,7 +103,7 @@ namespace proyectomiguelangel
 
                         // Estimación aproximada
                         var estimatedMinutes = sizeMB / 10; // MP3 ≈ 10MB/min
-                        SelectedFileLabel.Text += $"\n⏱️ Duración estimada: ~{estimatedMinutes:F1} min";
+                        SelectedFileLabel.Text += $"\n Duración estimada: ~{estimatedMinutes:F1} min";
                     }
                 }
                 catch
@@ -195,7 +195,7 @@ namespace proyectomiguelangel
                 // Configurar UI para procesamiento
                 ProgressFrame.IsVisible = true;
                 ResultsFrame.IsVisible = false;
-                ProgressLabel.Text = "🔧 Preparando transcripción...";
+                ProgressLabel.Text = " Preparando transcripción...";
                 TranscribeButton.IsEnabled = false;
                 CancelButton.IsVisible = true;
 
@@ -244,11 +244,11 @@ namespace proyectomiguelangel
                     !transcribedText.Contains("Error en transcripción"))
                 {
                     await DisplayAlert("✅ ¡Completado!",
-                        $"🎤 Transcripción finalizada exitosamente!\n\n" +
+                        $" Transcripción finalizada exitosamente!\n\n" +
                         $"📝 Caracteres: {transcribedText.Length}\n" +
                         $"🗣️ Idioma: {languageName}\n" +
                         $"📁 Archivo: {Path.GetFileName(_selectedFilePath)}",
-                        "👌 Perfecto");
+                        " Perfecto");
                 }
                 else
                 {
@@ -283,7 +283,7 @@ namespace proyectomiguelangel
                 "Francés 🇫🇷" => ("fr", "Francés"),
                 "Italiano 🇮🇹" => ("it", "Italiano"),
                 "Alemán 🇩🇪" => ("de", "Alemán"),
-                "Auto-detectar 🤖" => (null, "Auto-detección"),
+                "Auto-detectar " => (null, "Auto-detección"),
                 _ => ("es", "Español (por defecto)") // Fallback
             };
         }
@@ -328,11 +328,11 @@ namespace proyectomiguelangel
                 await DisplayAlert("✅ Copiado",
                     "La letra ha sido copiada al portapapeles.\n\n" +
                     "Puedes pegarla en cualquier aplicación.",
-                    "👌 Listo");
+                    " Listo");
             }
             else
             {
-                await DisplayAlert("❌ Error", "No hay letra para copiar", "OK");
+                await DisplayAlert(" Error", "No hay letra para copiar", "OK");
             }
         }
 
@@ -358,16 +358,16 @@ namespace proyectomiguelangel
                 await File.WriteAllTextAsync(filePath, TranscribedLyricsLabel.Text, Encoding.UTF8);
 
                 await DisplayAlert("✅ ¡Guardado!",
-                    $"📄 Letra guardada exitosamente en:\n\n" +
-                    $"📍 {filePath}\n\n" +
-                    $"💾 Puedes encontrarla en la carpeta de datos de la aplicación.",
-                    "👌 Perfecto");
+                    $" Letra guardada exitosamente en:\n\n" +
+                    $" {filePath}\n\n" +
+                    $" Puedes encontrarla en la carpeta de datos de la aplicación.",
+                    "Perfecto");
             }
             catch (Exception ex)
             {
                 await DisplayAlert("❌ Error",
                     $"Error al guardar la letra:\n\n{ex.Message}\n\n" +
-                    $"💡 Intenta copiar la letra y guardarla manualmente.",
+                    $" Intenta copiar la letra y guardarla manualmente.",
                     "OK");
             }
         }

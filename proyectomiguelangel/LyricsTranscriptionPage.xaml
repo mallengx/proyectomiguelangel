@@ -15,7 +15,7 @@
                    BorderColor="#27AE60"
                    HasShadow="True">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="🤖 TRANSCRIPCIÓN IA" 
+                    <Label Text=" TRANSCRIPCIÓN IA" 
                            FontSize="24" 
                            FontAttributes="Bold" 
                            TextColor="#FFFFFF"
@@ -114,7 +114,7 @@
                                     <x:String>🇫🇷 Francés</x:String>
                                     <x:String>🇮🇹 Italiano</x:String>
                                     <x:String>🇩🇪 Alemán</x:String>
-                                    <x:String>🤖 Auto-detectar</x:String>
+                                    <x:String>Auto-detectar</x:String>
                                 </Picker.Items>
                             </Picker>
                         </VerticalStackLayout>
@@ -123,7 +123,7 @@
                     <!-- Slider para precisión (simulado) -->
                     <Frame BackgroundColor="#2C3E50" Padding="10" CornerRadius="10">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="🎯 PRECISIÓN:" 
+                            <Label Text=" PRECISIÓN:" 
                                    FontSize="14" 
                                    FontAttributes="Bold"
                                    TextColor="#FFFFFF"/>
@@ -175,7 +175,7 @@
             <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
                 <Button x:Name="TranscribeButton"
                         Grid.Column="0"
-                        Text="🎶 TRANSCRIBIR"
+                        Text=" TRANSCRIBIR"
                         Clicked="OnTranscribeClicked"
                         BackgroundColor="#27AE60"
                         TextColor="White"

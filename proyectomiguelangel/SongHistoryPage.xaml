@@ -31,31 +31,50 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="🗑️ Limpiar" Clicked="OnClearHistoryClicked" />
-    </ContentPage.ToolbarItems>
+
 
     <Grid RowDefinitions="Auto,*">
         <!-- Filtros -->
         <Frame Grid.Row="0" 
-               BackgroundColor="#1A173A" 
-               Padding="15"
-               Margin="10,10,10,5"
-               CornerRadius="15"
-               BorderColor="#9B59B6">
-            <VerticalStackLayout Spacing="15">
-                <Label Text="Filtrar historial"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       TextColor="#FFFFFF"
-                       HorizontalOptions="Center"/>
+       BackgroundColor="#1A173A" 
+       Padding="15"
+       Margin="10,10,10,5"
+       CornerRadius="15"
+       BorderColor="#9B59B6">
 
-                <Picker x:Name="FilterPicker"
-                        Title="Seleccionar filtro..."
-                        TitleColor="#BBBBBB"
-                        TextColor="#FFFFFF"
-                        BackgroundColor="#2C3E50"
-                        SelectedIndexChanged="OnFilterChanged">
+            <!-- Grid principal con 2 columnas: título + botón -->
+            <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto, Auto, Auto, Auto">
+
+                <!-- Fila 1: Título y botón limpiar -->
+                <Label Grid.Row="0" Grid.Column="0"
+               Text="Filtrar historial"
+               FontSize="16"
+               FontAttributes="Bold"
+               TextColor="#FFFFFF"
+               VerticalOptions="Center"/>
+
+                <!-- Botón Limpiar Historial -->
+                <Button Grid.Row="0" Grid.Column="1"
+                Text="🗑️ Limpiar todo"
+                BackgroundColor="#E74C3C"
+                TextColor="White"
+                FontSize="14"
+                FontAttributes="Bold"
+                HeightRequest="40"
+                CornerRadius="20"
+                Clicked="OnClearHistoryClicked"
+                Margin="10,0,0,0"
+                Padding="15,0"/>
+
+                <!-- Fila 2: Picker (ocupa ambas columnas) -->
+                <Picker Grid.Row="1" Grid.ColumnSpan="2"
+                x:Name="FilterPicker"
+                Title="Seleccionar filtro..."
+                TitleColor="#BBBBBB"
+                TextColor="#FFFFFF"
+                BackgroundColor="#2C3E50"
+                Margin="0,15,0,0"
+                SelectedIndexChanged="OnFilterChanged">
                     <Picker.Items>
                         <x:String>📋 Todas las canciones</x:String>
                         <x:String>🎤 Solo identificadas por audio</x:String>
@@ -63,60 +82,68 @@
                     </Picker.Items>
                 </Picker>
 
-                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                <!-- Fila 3: Botones de filtro rápido (ocupa ambas columnas) -->
+                <Grid Grid.Row="2" Grid.ColumnSpan="2" 
+              ColumnDefinitions="*,*,*" 
+              ColumnSpacing="10"
+              Margin="0,15,0,0">
                     <Button Grid.Column="0"
-                            x:Name="BtnAll"
-                            Text="📋 Todas"
-                            BackgroundColor="#2C3E50"
-                            TextColor="#FFFFFF"
-                            FontSize="12"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Clicked="OnQuickFilterAll"
-                            BorderColor="#9B59B6"
-                            BorderWidth="0.5"/>
+                    x:Name="BtnAll"
+                    Text="📋 Todas"
+                    BackgroundColor="#2C3E50"
+                    TextColor="#FFFFFF"
+                    FontSize="12"
+                    HeightRequest="40"
+                    CornerRadius="8"
+                    Clicked="OnQuickFilterAll"
+                    BorderColor="#9B59B6"
+                    BorderWidth="0.5"/>
 
                     <Button Grid.Column="1"
-                            x:Name="BtnAudio"
-                            Text="🎤 Audio"
-                            BackgroundColor="#2C3E50"
-                            TextColor="#FFFFFF"
-                            FontSize="12"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Clicked="OnQuickFilterAudio"
-                            BorderColor="#27AE60"
-                            BorderWidth="0.5"/>
+                    x:Name="BtnAudio"
+                    Text="🎤 Audio"
+                    BackgroundColor="#2C3E50"
+                    TextColor="#FFFFFF"
+                    FontSize="12"
+                    HeightRequest="40"
+                    CornerRadius="8"
+                    Clicked="OnQuickFilterAudio"
+                    BorderColor="#27AE60"
+                    BorderWidth="0.5"/>
 
                     <Button Grid.Column="2"
-                            x:Name="BtnLyrics"
-                            Text="🔍 Letra"
-                            BackgroundColor="#2C3E50"
-                            TextColor="#FFFFFF"
-                            FontSize="12"
-                            HeightRequest="40"
-                            CornerRadius="8"
-                            Clicked="OnQuickFilterLyrics"
-                            BorderColor="#3498DB"
-                            BorderWidth="0.5"/>
+                    x:Name="BtnLyrics"
+                    Text="🔍 Letra"
+                    BackgroundColor="#2C3E50"
+                    TextColor="#FFFFFF"
+                    FontSize="12"
+                    HeightRequest="40"
+                    CornerRadius="8"
+                    Clicked="OnQuickFilterLyrics"
+                    BorderColor="#3498DB"
+                    BorderWidth="0.5"/>
                 </Grid>
 
-                <Grid ColumnDefinitions="*,*">
+                <!-- Fila 4: Contador de resultados (ocupa ambas columnas) -->
+                <Grid Grid.Row="3" Grid.ColumnSpan="2" 
+              ColumnDefinitions="*,*"
+              Margin="0,15,0,0">
                     <Label Grid.Column="0"
-                           Text="Resultados:"
-                           FontSize="14"
-                           TextColor="#BBBBBB"
-                           HorizontalOptions="End"/>
+                   Text="Resultados:"
+                   FontSize="14"
+                   TextColor="#BBBBBB"
+                   HorizontalOptions="End"/>
 
                     <Label x:Name="CountLabel"
-                           Grid.Column="1"
-                           Text="0"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           TextColor="#27AE60"
-                           HorizontalOptions="Start"/>
+                   Grid.Column="1"
+                   Text="0"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="#27AE60"
+                   HorizontalOptions="Start"
+                   Margin="10,0,0,0"/>
                 </Grid>
-            </VerticalStackLayout>
+            </Grid>
         </Frame>
 
         <!-- Lista de historial -->
