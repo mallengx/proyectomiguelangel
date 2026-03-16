@@ -59,7 +59,7 @@
                     </Ellipse>
 
                     <VerticalStackLayout Padding="20" Spacing="15">
-                        <Label Text="🎧 SELECCIONA AUDIO" 
+                        <Label Text=" SELECCIONA AUDIO" 
                                FontSize="18" 
                                FontAttributes="Bold" 
                                TextColor="#FFFFFF"/>
@@ -97,7 +97,7 @@
 
                     <Frame BackgroundColor="#2C3E50" Padding="10" CornerRadius="10">
                         <VerticalStackLayout Spacing="8">
-                            <Label Text="🌍 IDIOMA:" 
+                            <Label Text=" IDIOMA:" 
                                    FontSize="14" 
                                    FontAttributes="Bold"
                                    TextColor="#FFFFFF"/>

@@ -27,7 +27,7 @@ namespace proyectomiguelangel.Models
 
         public string SearchQuery { get; set; } // Para búsquedas de letras
 
-        // Relación con el ID original del historial (opcional)
+        // Relación con el ID original del historial 
         public int? OriginalHistoryId { get; set; }
     }
 }

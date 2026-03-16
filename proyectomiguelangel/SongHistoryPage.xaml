@@ -339,28 +339,29 @@
                                     </Frame>
 
                                     <!-- Botones YouTube/Spotify, -->
-                                    <HorizontalStackLayout Grid.Column="1"
-                                                           Spacing="10"
-                                                           HorizontalOptions="End"
-                                                           VerticalOptions="Center">
-                                        <ImageButton Source="youtube_icon.png"
-                 BackgroundColor="#FF0000"
-                 HeightRequest="40"
-                 WidthRequest="120"
-                 CornerRadius="8"
-                 Aspect="AspectFit"
-                 Clicked="OnOpenYouTubeClicked"
-                 CommandParameter="{Binding .}" />
+                                    <Grid Grid.Row="6" Grid.Column="1"
+ColumnDefinitions="*,*"
+ColumnSpacing="8"
+Margin="0,5,0,0">
 
-                                        <ImageButton Source="spotify_icon.png"
-                 BackgroundColor="#1DB954"
-                 HeightRequest="40"
-                 WidthRequest="120"
-                 CornerRadius="8"
-                 Aspect="AspectFit"
-                 Clicked="OnOpenSpotifyClicked"
-                 CommandParameter="{Binding .}" />
-                                    </HorizontalStackLayout>
+                                        <ImageButton Grid.Column="0"
+           Source="youtube_icon.png"
+           BackgroundColor="#FF0000"
+           HeightRequest="35"
+           CornerRadius="8"
+           Aspect="AspectFit"
+           Clicked="OnOpenYouTubeClicked"
+           CommandParameter="{Binding .}" />
+
+                                        <ImageButton Grid.Column="1"
+           Source="spotify_icon.png"
+           BackgroundColor="#1DB954"
+           HeightRequest="35"
+           CornerRadius="8"
+           Aspect="AspectFit"
+           Clicked="OnOpenSpotifyClicked"
+           CommandParameter="{Binding .}" />
+                                    </Grid>
                                 </Grid>
                             </VerticalStackLayout>
                         </Frame>

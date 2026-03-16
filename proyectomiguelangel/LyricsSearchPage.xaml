@@ -26,7 +26,7 @@
                    HeightRequest="50"
                    ClearButtonVisibility="WhileEditing"/>
 
-            <Button Text="Buscar canción 🎵"
+            <Button Text="Buscar canción "
                     Clicked="OnBuscarClicked"
                     BackgroundColor="#27AE60"
                     TextColor="White"
@@ -175,29 +175,29 @@
                                 </HorizontalStackLayout>
 
                                 <!-- YouTube / Spotify -->
-                                <HorizontalStackLayout Grid.Row="6" Grid.Column="1"
-                                                       Spacing="10"
-                                                       HorizontalOptions="Start"
-                                                       Margin="0,5,0,0">
+                                <Grid Grid.Row="6" Grid.Column="1"
+      ColumnDefinitions="*,*"
+      ColumnSpacing="8"
+      Margin="0,5,0,0">
 
-                                    <ImageButton Source="youtube_icon.png"
-                                                 BackgroundColor="#FF0000"
-                                                 HeightRequest="40"
-                                                 WidthRequest="120"
-                                                 CornerRadius="8"
-                                                 Aspect="AspectFit"
-                                                 Clicked="OnOpenYouTubeClicked"
-                                                 CommandParameter="{Binding .}" />
+                                    <ImageButton Grid.Column="0"
+                 Source="youtube_icon.png"
+                 BackgroundColor="#FF0000"
+                 HeightRequest="35"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenYouTubeClicked"
+                 CommandParameter="{Binding .}" />
 
-                                    <ImageButton Source="spotify_icon.png"
-                                                 BackgroundColor="#1DB954"
-                                                 HeightRequest="40"
-                                                 WidthRequest="120"
-                                                 CornerRadius="8"
-                                                 Aspect="AspectFit"
-                                                 Clicked="OnOpenSpotifyClicked"
-                                                 CommandParameter="{Binding .}" />
-                                </HorizontalStackLayout>
+                                    <ImageButton Grid.Column="1"
+                 Source="spotify_icon.png"
+                 BackgroundColor="#1DB954"
+                 HeightRequest="35"
+                 CornerRadius="8"
+                 Aspect="AspectFit"
+                 Clicked="OnOpenSpotifyClicked"
+                 CommandParameter="{Binding .}" />
+                                </Grid>
 
                                 <!-- Preview no disponible -->
                                 <Label Grid.Row="4" Grid.Column="1"
