@@ -1,3 +1,5 @@
+Ôªøusing Plugin.Maui.Audio;
+using System.Collections.ObjectModel;
 using System.Collections.ObjectModel;
 using Plugin.Maui.Audio;
 using proyectomiguelangel.Models;
@@ -14,7 +16,9 @@ namespace proyectomiguelangel
         private SongHistory _currentPlayingSong;
         private bool _isPreviewPlaying = false;
 
-        // Diccionario para mantener el estado de los botones por canciÛn
+        private bool _isAudioPlaying = false;
+
+        // Diccionario para mantener el estado de los botones por canci√≥n
         private Dictionary<int, (Button playButton, Button pauseButton)> _songButtons = new();
 
         private ObservableCollection<SongHistory> _allSongs;
@@ -103,10 +107,10 @@ namespace proyectomiguelangel
                             song.PreviewUrl = newPreview;
                             await _databaseService.SaveSongAsync(song);
 
-                            // Actualizar UI si la canciÛn est· visible
+                            // Actualizar UI si la canci√≥n est√° visible
                             MainThread.BeginInvokeOnMainThread(() =>
                             {
-                                // Forzar actualizaciÛn del CollectionView
+                                // Forzar actualizaci√≥n del CollectionView
                                 var index = _filteredSongs.IndexOf(song);
                                 if (index >= 0)
                                 {
@@ -165,7 +169,7 @@ namespace proyectomiguelangel
             }
         }
 
-        // ============ M…TODOS DE FILTRO ============
+        // ============ M√âTODOS DE FILTRO ============
         private async void OnFilterChanged(object sender, EventArgs e)
         {
             if (sender is Picker picker)
@@ -242,15 +246,15 @@ namespace proyectomiguelangel
             activeButton.FontAttributes = FontAttributes.Bold;
         }
 
-        // ============ M…TODOS CRUD ============
+        // ============ M√âTODOS CRUD ============
         private async void OnDeleteSongClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
             {
                 await button.AnimatePressAsync();
 
-                bool confirm = await DisplayAlert("Eliminar canciÛn",
-                    $"øEliminar '{song.Title}' del historial?", "SÌ", "No");
+                bool confirm = await DisplayAlert("Eliminar canci√≥n",
+                    $"¬øEliminar '{song.Title}' del historial?", "S√≠", "No");
 
                 if (confirm)
                 {
@@ -281,7 +285,7 @@ namespace proyectomiguelangel
                         }
 
                         UpdateCountLabel();
-                        await DisplayAlert("? Eliminado", "CanciÛn eliminada del historial", "OK");
+                        await DisplayAlert("? Eliminado", "Canci√≥n eliminada del historial", "OK");
                     }
                 }
             }
@@ -290,8 +294,8 @@ namespace proyectomiguelangel
         private async void OnClearHistoryClicked(object sender, EventArgs e)
         {
             bool confirm = await DisplayAlert("Limpiar historial",
-                "øEliminar TODAS las canciones del historial?\n\nEsta acciÛn no se puede deshacer.",
-                "? SÌ, limpiar", "? Cancelar");
+                "¬øEliminar TODAS las canciones del historial?\n\nEsta acci√≥n no se puede deshacer.",
+                "? S√≠, limpiar", "? Cancelar");
 
             if (confirm)
             {
@@ -316,7 +320,7 @@ namespace proyectomiguelangel
             RefreshView.IsRefreshing = false;
         }
 
-        // ============ M…TODOS DE REPRODUCCI”N - CORREGIDOS CON REFRESH ============
+        // ============ M√âTODOS DE REPRODUCCI√ìN - CORREGIDOS CON REFRESH ============
 
         public void RegisterSongButtons(int songId, Button playButton, Button pauseButton)
         {
@@ -372,7 +376,6 @@ namespace proyectomiguelangel
                 });
             }
         }
-
         private async void OnPlayPreviewClicked(object sender, EventArgs e)
         {
             if (sender is Button button && button.CommandParameter is SongHistory song)
@@ -381,48 +384,22 @@ namespace proyectomiguelangel
 
                 try
                 {
-                    // Mostrar indicador de carga en el botÛn
-                    button.Text = "?";
+                    button.Text = "‚è≥";
                     button.IsEnabled = false;
 
-                    // Obtener URL v·lida (refresca autom·ticamente si es necesario)
                     string validPreviewUrl = await _previewRefreshService.GetValidPreviewUrlAsync(song);
 
-                    button.Text = "? Reproducir";
+                    button.Text = "‚ñ∂ Reproducir";
                     button.IsEnabled = true;
 
                     if (string.IsNullOrEmpty(validPreviewUrl))
                     {
                         await DisplayAlert("Preview no disponible",
-                            "No se pudo obtener un preview v·lido para esta canciÛn.\n" +
-                            "Puede que el preview haya expirado y no estÈ disponible en Deezer.", "OK");
-
-                        // Actualizar UI para mostrar que no hay preview
-                        if (button.Parent is HorizontalStackLayout parent)
-                        {
-                            var pauseBtn = parent.Children.OfType<Button>()
-                                .FirstOrDefault(b => b.Text.Contains("Pausa"));
-
-                            if (pauseBtn != null)
-                            {
-                                button.IsVisible = false;
-                                pauseBtn.IsVisible = false;
-
-                                // Mostrar mensaje de no disponible
-                                var noPreviewLabel = new Label
-                                {
-                                    Text = "?? No disponible",
-                                    FontSize = 12,
-                                    TextColor = Color.FromArgb("#F39C12"),
-                                    VerticalOptions = LayoutOptions.Center
-                                };
-                                parent.Children.Add(noPreviewLabel);
-                            }
-                        }
+                            "No se pudo obtener un preview v√°lido.", "OK");
                         return;
                     }
 
-                    // Buscar el botÛn de pausa asociado
+                    // Buscar el bot√≥n de pausa asociado
                     Button foundPauseButton = null;
                     if (button.Parent is HorizontalStackLayout parentLayout)
                     {
@@ -435,7 +412,7 @@ namespace proyectomiguelangel
                         }
                     }
 
-                    // Si hay otra canciÛn reproduciÈndose, detenerla
+                    // Si hay otra canci√≥n reproduci√©ndose, detenerla
                     if (_currentPlayingSong != null && _currentPlayingSong.Id != song.Id)
                     {
                         StopAudio();
@@ -445,48 +422,36 @@ namespace proyectomiguelangel
                         }
                     }
 
-                    // Si estamos reproduciendo la misma canciÛn, pausar
-                    if (_currentPlayingSong?.Id == song.Id && _isPreviewPlaying)
+                    // Si estamos reproduciendo la misma canci√≥n, pausar
+                    if (_currentPlayingSong?.Id == song.Id && _isAudioPlaying)
                     {
-                        OnPausePreviewClicked(sender, e);
+                        OnPauseAudioClicked(sender, e);
                         return;
                     }
 
-                    // Si tenemos el player pausado de la misma canciÛn, reanudar
-                    if (_audioPlayer != null && !_isPreviewPlaying && _currentPlayingSong?.Id == song.Id)
+                    // Si tenemos el player pausado de la misma canci√≥n, reanudar
+                    if (_audioPlayer != null && !_isAudioPlaying && _currentPlayingSong?.Id == song.Id)
                     {
                         _audioPlayer.Play();
-                        _isPreviewPlaying = true;
+                        _isAudioPlaying = true;
                         UpdatePlaybackState(song.Id, true);
+
+                        // A√ëADE ESTA L√çNEA para reiniciar el temporizador
+                        Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+
                         return;
                     }
 
-                    // Nueva reproducciÛn
-                    _audioPlayer?.Stop();
-                    _audioPlayer?.Dispose();
-
-                    using var http = new HttpClient();
-                    var data = await http.GetByteArrayAsync(validPreviewUrl);
-                    var stream = new MemoryStream(data);
-
-                    _audioPlayer = _audioManager.CreatePlayer(stream);
-                    _audioPlayer.PlaybackEnded += (s, args) => OnPlaybackEnded(song.Id);
-                    _audioPlayer.Play();
+                    // Mostrar el reproductor y reproducir
+                    AudioPlayerFrame.IsVisible = true;
+                    NowPlayingLabel.Text = $"üéµ {song.Title} - {song.Artist}";
+                    LyricsMatchFrame.IsVisible = false;
 
                     _currentPlayingSong = song;
-                    _isPreviewPlaying = true;
+
+                    await PlayAudioFromUrl(validPreviewUrl, 0);
 
                     UpdatePlaybackState(song.Id, true);
-                }
-                catch (HttpRequestException ex) when (ex.Message.Contains("403"))
-                {
-                    // Error 403 especÌfico - preview expirado
-                    await DisplayAlert("Preview expirado",
-                        "El preview de esta canciÛn ha expirado.\n" +
-                        "Intenta buscar la canciÛn nuevamente en la p·gina de b˙squeda.", "OK");
-
-                    // Intentar refrescar el preview para futuras ocasiones
-                    await _previewRefreshService.RefreshPreviewUrlAsync(song.Title, song.Artist);
                 }
                 catch (Exception ex)
                 {
@@ -494,12 +459,118 @@ namespace proyectomiguelangel
                 }
                 finally
                 {
-                    button.Text = "? Reproducir";
+                    button.Text = "‚ñ∂ Reproducir";
                     button.IsEnabled = true;
                 }
             }
         }
 
+        // ============ M√âTODOS DE REPRODUCCI√ìN ============
+
+        private async Task PlayAudioFromUrl(string audioUrl, double startTime = 0)
+        {
+            try
+            {
+                StopAudio();
+
+                using var httpClient = new HttpClient();
+                var audioData = await httpClient.GetByteArrayAsync(audioUrl);
+                var stream = new MemoryStream(audioData);
+
+                _audioPlayer = AudioManager.Current.CreatePlayer(stream);
+
+                if (_audioPlayer != null)
+                {
+                    _audioPlayer.PlaybackEnded += OnPlaybackEnded;
+
+                    if (startTime > 0 && startTime < _audioPlayer.Duration)
+                    {
+                        _audioPlayer.Seek(startTime);
+                    }
+
+                    _audioPlayer.Play();
+                    _isAudioPlaying = true;
+
+                    UpdatePlaybackControls();
+
+                    var currentTime = startTime > 0 ? startTime : 0;
+                    var durationStr = TimeSpan.FromSeconds(_audioPlayer.Duration).ToString(@"mm\:ss");
+                    var currentTimeStr = TimeSpan.FromSeconds(currentTime).ToString(@"mm\:ss");
+                    TimeLabel.Text = $"{currentTimeStr} / {durationStr}";
+                    AudioProgressBar.Progress = currentTime / _audioPlayer.Duration;
+
+                    Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No se pudo crear el reproductor de audio", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error de Audio", $"No se pudo reproducir:\n{ex.Message}", "OK");
+            }
+        }
+        private bool UpdateProgress()
+        {
+            if (_audioPlayer != null && _isAudioPlaying && _audioPlayer.Duration > 0)
+            {
+                var currentTime = _audioPlayer.CurrentPosition;
+                var duration = _audioPlayer.Duration;
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    AudioProgressBar.Progress = currentTime / duration;
+                    TimeLabel.Text = $"{TimeSpan.FromSeconds(currentTime):mm\\:ss} / {TimeSpan.FromSeconds(duration):mm\\:ss}";
+                });
+            }
+            return _isAudioPlaying;
+        }
+
+
+
+        private async void OnPlayAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            if (_audioPlayer != null && !_isAudioPlaying)
+            {
+                _audioPlayer.Play();
+                _isAudioPlaying = true;
+                UpdatePlaybackControls();
+
+                // REINICIAR el temporizador al reanudar
+                Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+            }
+        }
+
+
+        private async void OnPauseAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            if (_audioPlayer != null && _isAudioPlaying)
+            {
+                _audioPlayer.Pause();
+                _isAudioPlaying = false;
+                UpdatePlaybackControls();
+            }
+        }
+        private async void OnStopAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            StopAudio();
+        }
         private async void OnPausePreviewClicked(object sender, EventArgs e)
         {
             if (sender is Button button)
@@ -507,17 +578,62 @@ namespace proyectomiguelangel
                 await button.AnimatePressAsync();
             }
 
-            if (_audioPlayer == null || !_isPreviewPlaying)
-                return;
-
-            _audioPlayer.Pause();
-            _isPreviewPlaying = false;
-
-            if (_currentPlayingSong != null)
+            // Si hay un audio reproduci√©ndose, lo pausamos
+            if (_audioPlayer != null && _isAudioPlaying)
             {
-                UpdatePlaybackState(_currentPlayingSong.Id, false);
+                _audioPlayer.Pause();
+                _isAudioPlaying = false;
+                UpdatePlaybackControls();
+
+                // Actualizar el estado del bot√≥n en la tarjeta
+                if (sender is Button btn && btn.CommandParameter is SongHistory song)
+                {
+                    UpdatePlaybackState(song.Id, false);
+                }
             }
         }
+        private async void OnClosePlayerClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            // Guardar referencia a la canci√≥n que se estaba reproduciendo
+            var songToReset = _currentPlayingSong;
+
+            // Detener el audio y ocultar el reproductor
+            StopAudio();
+            AudioPlayerFrame.IsVisible = false;
+
+            // Forzar restablecimiento del bot√≥n en la tarjeta
+            if (songToReset != null)
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Actualizar el estado del bot√≥n
+                    UpdatePlaybackState(songToReset.Id, false);
+
+                    // Tambi√©n podemos buscar el bot√≥n directamente en el diccionario
+                    if (_songButtons.ContainsKey(songToReset.Id))
+                    {
+                        var (playBtn, pauseBtn) = _songButtons[songToReset.Id];
+                        if (playBtn != null && pauseBtn != null)
+                        {
+                            playBtn.IsVisible = true;
+                            pauseBtn.IsVisible = false;
+                        }
+                    }
+                });
+            }
+        }
+        private void UpdatePlaybackControls()
+        {
+            PlayButton.IsEnabled = !_isAudioPlaying && _audioPlayer != null;
+            PauseButton.IsEnabled = _isAudioPlaying && _audioPlayer != null;
+            StopButton.IsEnabled = _audioPlayer != null;
+        }
+
 
         private void PreviewButtonsLayout_BindingContextChanged(object sender, EventArgs e)
         {
@@ -537,35 +653,53 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnPlaybackEnded(int songId)
+
+        private void OnPlaybackEnded(object sender, EventArgs e)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                _isAudioPlaying = false;
                 _isPreviewPlaying = false;
-                UpdatePlaybackState(songId, false);
-                _currentPlayingSong = null;
+                AudioProgressBar.Progress = 1.0;
+                TimeLabel.Text = "Finalizado";
+                UpdatePlaybackControls();
+
+                if (_currentPlayingSong != null)
+                {
+                    UpdatePlaybackState(_currentPlayingSong.Id, false);
+
+                    // Tambi√©n podemos ocultar el reproductor autom√°ticamente
+                    AudioPlayerFrame.IsVisible = false;
+
+                    _currentPlayingSong = null;
+                }
             });
         }
-
         private void StopAudio()
         {
             if (_audioPlayer != null)
             {
                 _audioPlayer.Stop();
+                _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
                 _audioPlayer.Dispose();
                 _audioPlayer = null;
             }
 
-            if (_currentPlayingSong != null)
-            {
-                UpdatePlaybackState(_currentPlayingSong.Id, false);
-            }
-
+            _isAudioPlaying = false;
             _isPreviewPlaying = false;
-            _currentPlayingSong = null;
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                UpdatePlaybackControls();
+                AudioProgressBar.Progress = 0;
+                TimeLabel.Text = "00:00 / 00:30";
+            });
+
+            // NO restablecemos el estado del bot√≥n aqu√≠, lo haremos en OnClosePlayerClicked
+            // _currentPlayingSong se mantiene para poder usarlo en OnClosePlayerClicked
         }
 
-        // ============ M…TODOS YOUTUBE/SPOTIFY ============
+        // ============ M√âTODOS YOUTUBE/SPOTIFY ============
         private async void OnOpenYouTubeClicked(object sender, EventArgs e)
         {
             if (sender is ImageButton imageButton && imageButton.CommandParameter is SongHistory song)
@@ -631,6 +765,7 @@ namespace proyectomiguelangel
     // Extensiones para animaciones
     public static class ViewExtensions
     {
+
         public static async Task AnimatePressAsync(this VisualElement view, int duration = 100)
         {
             try
@@ -641,7 +776,7 @@ namespace proyectomiguelangel
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error en animaciÛn: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error en animaci√≥n: {ex.Message}");
             }
         }
     }

@@ -14,6 +14,9 @@ namespace proyectomiguelangel
         private FavoriteSong _currentPlayingSong;
         private bool _isPreviewPlaying = false;
 
+
+
+      
         // Diccionario para mantener el estado de los botones
         private Dictionary<int, (Button playButton, Button pauseButton)> _songButtons = new();
 
@@ -161,7 +164,7 @@ namespace proyectomiguelangel
                     button.Text = "⏳";
                     button.IsEnabled = false;
 
-                    // USAR EL NUEVO MÉTODO QUE ACEPTA FAVORITESONG
+                    // Obtener URL válida del preview
                     string validPreviewUrl = await _previewRefreshService.GetValidPreviewUrlAsync(song);
 
                     button.Text = "▶ Reproducir";
@@ -184,7 +187,7 @@ namespace proyectomiguelangel
                         return;
                     }
 
-                    // Buscar botón de pausa
+                    // Buscar el botón de pausa asociado
                     Button foundPauseButton = null;
                     if (button.Parent is HorizontalStackLayout parentLayout)
                     {
@@ -220,23 +223,26 @@ namespace proyectomiguelangel
                         _audioPlayer.Play();
                         _isPreviewPlaying = true;
                         UpdatePlaybackState(song.Id, true);
+
+                        // Mostrar el reproductor si no está visible
+                        AudioPlayerFrame.IsVisible = true;
+                        NowPlayingLabel.Text = $"🎵 {song.Title} - {song.Artist}";
+
+                        // AÑADE ESTA LÍNEA para reiniciar el temporizador
+                        Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+
                         return;
                     }
 
-                    // Nueva reproducción
-                    _audioPlayer?.Stop();
-                    _audioPlayer?.Dispose();
-
-                    using var http = new HttpClient();
-                    var data = await http.GetByteArrayAsync(validPreviewUrl);
-                    var stream = new MemoryStream(data);
-
-                    _audioPlayer = _audioManager.CreatePlayer(stream);
-                    _audioPlayer.PlaybackEnded += (s, args) => OnPlaybackEnded(song.Id);
-                    _audioPlayer.Play();
+                    // NUEVO: Mostrar el reproductor y reproducir con PlayAudioFromUrl
+                    AudioPlayerFrame.IsVisible = true;
+                    NowPlayingLabel.Text = $"🎵 {song.Title} - {song.Artist}";
+                    LyricsMatchFrame.IsVisible = false; // Oculto en favoritos
 
                     _currentPlayingSong = song;
-                    _isPreviewPlaying = true;
+
+                    // Usar el nuevo método PlayAudioFromUrl
+                    await PlayAudioFromUrl(validPreviewUrl, 0);
 
                     UpdatePlaybackState(song.Id, true);
                 }
@@ -279,13 +285,25 @@ namespace proyectomiguelangel
             }
         }
 
-        private void OnPlaybackEnded(int songId)
+        private void OnPlaybackEnded(object sender, EventArgs e)
         {
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 _isPreviewPlaying = false;
-                UpdatePlaybackState(songId, false);
-                _currentPlayingSong = null;
+
+                if (_currentPlayingSong != null)
+                {
+                    UpdatePlaybackState(_currentPlayingSong.Id, false);
+
+                    // También ocultar el reproductor si ha terminado
+                    AudioPlayerFrame.IsVisible = false;
+
+                    _currentPlayingSong = null;
+                }
+
+                AudioProgressBar.Progress = 1.0;
+                TimeLabel.Text = "Finalizado";
+                UpdatePlaybackControls();
             });
         }
 
@@ -294,19 +312,17 @@ namespace proyectomiguelangel
             if (_audioPlayer != null)
             {
                 _audioPlayer.Stop();
+                _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
                 _audioPlayer.Dispose();
                 _audioPlayer = null;
             }
 
-            if (_currentPlayingSong != null)
-            {
-                UpdatePlaybackState(_currentPlayingSong.Id, false);
-            }
-
             _isPreviewPlaying = false;
-            _currentPlayingSong = null;
-        }
 
+            // NO tocamos la UI aquí
+            // NO restablecemos el estado del botón
+            // NO ponemos _currentPlayingSong = null
+        }
         // ============ MÉTODOS CRUD DE FAVORITOS ============
         private async Task RefreshExpiredFavoritesAsync()
         {
@@ -414,6 +430,212 @@ namespace proyectomiguelangel
             }
         }
 
+        private async void OnPlayAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            if (_audioPlayer != null && !_isPreviewPlaying)
+            {
+                _audioPlayer.Play();
+                _isPreviewPlaying = true;
+                UpdatePlaybackControls();
+
+                // REINICIAR el temporizador al reanudar
+                Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+            }
+        }
+        private async void OnPauseAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            if (_audioPlayer != null && _isPreviewPlaying)
+            {
+                _audioPlayer.Pause();
+                _isPreviewPlaying = false;
+                UpdatePlaybackControls();
+
+                // El temporizador se detendrá solo porque UpdateProgress devolverá false
+                // Pero puedes forzarlo si quieres:
+                // El temporizador seguirá ejecutándose pero UpdateProgress devolverá false
+            }
+        }
+        private async void OnStopAudioClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            // Guardar referencia antes de detener
+            var songToReset = _currentPlayingSong;
+
+            // Detener audio (solo recursos, no UI)
+            StopAudio();
+
+            // Actualizar UI del reproductor
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                UpdatePlaybackControls();
+                AudioProgressBar.Progress = 0;
+                TimeLabel.Text = "00:00 / 00:30";
+
+                // Restablecer el botón de la canción (solo en Stop)
+                if (songToReset != null)
+                {
+                    UpdatePlaybackState(songToReset.Id, false);
+                }
+            });
+
+            _currentPlayingSong = null;
+        }
+
+        private async void OnClosePlayerClicked(object sender, EventArgs e)
+        {
+            if (sender is Button button)
+            {
+                await button.AnimatePressAsync();
+            }
+
+            // Guardar referencia a la canción que se estaba reproduciendo
+            var songToReset = _currentPlayingSong;
+
+            // Detener el audio
+            if (_audioPlayer != null)
+            {
+                _audioPlayer.Stop();
+                _audioPlayer.PlaybackEnded -= OnPlaybackEnded;
+                _audioPlayer.Dispose();
+                _audioPlayer = null;
+            }
+
+            _isPreviewPlaying = false;
+
+            // Actualizar controles del reproductor
+            UpdatePlaybackControls();
+            AudioProgressBar.Progress = 0;
+            TimeLabel.Text = "00:00 / 00:30";
+
+            // CERRAR el reproductor
+            AudioPlayerFrame.IsVisible = false;
+
+            // RESTABLECER el estado del botón de la canción (solo aquí)
+            if (songToReset != null)
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    UpdatePlaybackState(songToReset.Id, false);
+
+                    // También buscar el botón directamente en el diccionario
+                    if (_songButtons.ContainsKey(songToReset.Id))
+                    {
+                        var (playBtn, pauseBtn) = _songButtons[songToReset.Id];
+                        if (playBtn != null && pauseBtn != null)
+                        {
+                            playBtn.IsVisible = true;
+                            pauseBtn.IsVisible = false;
+                        }
+                    }
+                });
+            }
+
+            _currentPlayingSong = null;
+        }
+        private void UpdatePlaybackControls()
+        {
+            PlayButton.IsEnabled = !_isPreviewPlaying && _audioPlayer != null;
+            PauseButton.IsEnabled = _isPreviewPlaying && _audioPlayer != null;
+            StopButton.IsEnabled = _audioPlayer != null;
+        }
+
+        private async Task PlayAudioFromUrl(string audioUrl, double startTime = 0)
+        {
+            try
+            {
+                StopAudio();
+
+                using var httpClient = new HttpClient();
+                var audioData = await httpClient.GetByteArrayAsync(audioUrl);
+                var stream = new MemoryStream(audioData);
+
+                _audioPlayer = _audioManager.CreatePlayer(stream);
+
+                if (_audioPlayer != null)
+                {
+                    _audioPlayer.PlaybackEnded += OnPlaybackEnded; // Cambiado aquí
+
+                    if (startTime > 0 && startTime < _audioPlayer.Duration)
+                    {
+                        _audioPlayer.Seek(startTime);
+                    }
+
+                    _audioPlayer.Play();
+                    _isPreviewPlaying = true;
+
+                    UpdatePlaybackControls();
+
+                    var currentTime = startTime > 0 ? startTime : 0;
+                    var durationStr = TimeSpan.FromSeconds(_audioPlayer.Duration).ToString(@"mm\:ss");
+                    var currentTimeStr = TimeSpan.FromSeconds(currentTime).ToString(@"mm\:ss");
+                    TimeLabel.Text = $"{currentTimeStr} / {durationStr}";
+                    AudioProgressBar.Progress = currentTime / _audioPlayer.Duration;
+
+                    Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
+                }
+                else
+                {
+                    await DisplayAlert("Error", "No se pudo crear el reproductor de audio", "OK");
+                }
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlert("Error de Audio", $"No se pudo reproducir:\n{ex.Message}", "OK");
+            }
+        }
+        private bool UpdateProgress()
+        {
+            // Verificar que el audioPlayer existe y está reproduciendo
+            if (_audioPlayer != null && _isPreviewPlaying && _audioPlayer.Duration > 0)
+            {
+                var currentTime = _audioPlayer.CurrentPosition;
+                var duration = _audioPlayer.Duration;
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Actualizar barra de progreso y tiempo
+                    AudioProgressBar.Progress = currentTime / duration;
+                    TimeLabel.Text = $"{TimeSpan.FromSeconds(currentTime):mm\\:ss} / {TimeSpan.FromSeconds(duration):mm\\:ss}";
+                });
+
+                // Continuar el temporizador mientras se reproduce
+                return true;
+            }
+
+            // Si no se está reproduciendo, detener el temporizador
+            return _isPreviewPlaying;
+        }
+        private void PreviewButtonsLayout_BindingContextChanged(object sender, EventArgs e)
+        {
+            if (sender is HorizontalStackLayout layout && layout.BindingContext is FavoriteSong song)
+            {
+                var playButton = layout.Children.OfType<Button>().FirstOrDefault(b => b.Text.Contains("Reproducir"));
+                var pauseButton = layout.Children.OfType<Button>().FirstOrDefault(b => b.Text.Contains("Pausa"));
+
+                if (playButton != null && pauseButton != null)
+                {
+                    RegisterSongButtons(song.Id, playButton, pauseButton);
+
+                    // Resetear estado inicial
+                    playButton.IsVisible = true;
+                    pauseButton.IsVisible = false;
+                }
+            }
+        }
 
         protected override void OnDisappearing()
         {

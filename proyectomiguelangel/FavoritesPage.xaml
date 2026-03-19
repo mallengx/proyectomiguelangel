@@ -14,8 +14,8 @@
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*">
-        <!-- Encabezado con contador -->
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- FILA 0: Encabezado con contador -->
         <Frame Grid.Row="0"
                BackgroundColor="#1A173A"
                Padding="15"
@@ -48,7 +48,7 @@
             </VerticalStackLayout>
         </Frame>
 
-        <!-- Lista de favoritos -->
+        <!-- FILA 1: Lista de favoritos -->
         <RefreshView Grid.Row="1"
                      x:Name="RefreshView"
                      Refreshing="OnRefresh"
@@ -184,7 +184,7 @@
                                 <!-- Controles de preview y enlaces -->
                                 <Grid ColumnDefinitions="*,*"
                                       Margin="0,10,0,0">
-                                    <!-- Preview -->
+                                    <!-- Columna izquierda: Preview -->
                                     <Grid Grid.Column="0"
                                           IsVisible="{Binding PreviewUrl, Converter={StaticResource StringToBoolConverter}}">
                                         <Grid.RowDefinitions>
@@ -199,7 +199,9 @@
                                                Margin="0,0,0,5"/>
 
                                         <HorizontalStackLayout Grid.Row="1"
-                                                               Spacing="10">
+                                                               Spacing="10"
+                                                               x:Name="PreviewButtonsLayout"
+                                                               BindingContextChanged="PreviewButtonsLayout_BindingContextChanged">
                                             <Button Text="▶ Reproducir"
                                                     BackgroundColor="#27AE60"
                                                     TextColor="White"
@@ -221,7 +223,7 @@
                                         </HorizontalStackLayout>
                                     </Grid>
 
-                                    <!-- Sin preview -->
+                                    <!-- Columna izquierda alternativa: Sin preview -->
                                     <Frame Grid.Column="0"
                                            BackgroundColor="#2C3E50"
                                            Padding="10"
@@ -232,29 +234,28 @@
                                                TextColor="#F39C12"/>
                                     </Frame>
 
-                                    <!-- YouTube/Spotify -->
-                                    <Grid Grid.Row="6" Grid.Column="1"
-ColumnDefinitions="*,*"
-ColumnSpacing="8"
-Margin="0,5,0,0">
-
+                                    <!-- Columna derecha: YouTube/Spotify -->
+                                    <Grid Grid.Column="1"
+                                          ColumnDefinitions="*,*"
+                                          ColumnSpacing="8"
+                                          Margin="0,5,0,0">
                                         <ImageButton Grid.Column="0"
-           Source="youtube_icon.png"
-           BackgroundColor="#FF0000"
-           HeightRequest="35"
-           CornerRadius="8"
-           Aspect="AspectFit"
-           Clicked="OnOpenYouTubeClicked"
-           CommandParameter="{Binding .}" />
+                                                     Source="youtube_icon.png"
+                                                     BackgroundColor="#FF0000"
+                                                     HeightRequest="35"
+                                                     CornerRadius="8"
+                                                     Aspect="AspectFit"
+                                                     Clicked="OnOpenYouTubeClicked"
+                                                     CommandParameter="{Binding .}" />
 
                                         <ImageButton Grid.Column="1"
-           Source="spotify_icon.png"
-           BackgroundColor="#1DB954"
-           HeightRequest="35"
-           CornerRadius="8"
-           Aspect="AspectFit"
-           Clicked="OnOpenSpotifyClicked"
-           CommandParameter="{Binding .}" />
+                                                     Source="spotify_icon.png"
+                                                     BackgroundColor="#1DB954"
+                                                     HeightRequest="35"
+                                                     CornerRadius="8"
+                                                     Aspect="AspectFit"
+                                                     Clicked="OnOpenSpotifyClicked"
+                                                     CommandParameter="{Binding .}" />
                                     </Grid>
                                 </Grid>
                             </VerticalStackLayout>
@@ -263,5 +264,90 @@ Margin="0,5,0,0">
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </RefreshView>
+
+        <!-- FILA 2: Reproductor (igual que en SongHistoryPage) -->
+        <Frame Grid.Row="2"
+               x:Name="AudioPlayerFrame"
+               IsVisible="False"
+               BackgroundColor="#1A173A"
+               Padding="15"
+               Margin="10,5,10,10"
+               CornerRadius="15">
+            <VerticalStackLayout Spacing="10">
+                <Label x:Name="NowPlayingLabel"
+                       Text="Reproduciendo..." 
+                       FontSize="14" 
+                       FontAttributes="Bold"
+                       TextColor="#FFFFFF"
+                       HorizontalOptions="Center" />
+
+                <!-- Panel de coincidencia de letra (siempre oculto en favoritos) -->
+                <Frame x:Name="LyricsMatchFrame"
+                       IsVisible="False"
+                       BackgroundColor="#2C3E50"
+                       Padding="10">
+                    <Label x:Name="LyricsMatchLabel"
+                           Text=""
+                           FontSize="12"
+                           TextColor="#27AE60"
+                           LineBreakMode="WordWrap" />
+                </Frame>
+
+                <Grid ColumnDefinitions="*,*,*" 
+                      ColumnSpacing="10"
+                      HorizontalOptions="Center">
+
+                    <Button x:Name="PlayButton"
+                            Grid.Column="0"
+                            Text="▶ Play"
+                            Clicked="OnPlayAudioClicked"
+                            BackgroundColor="#27AE60"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35"
+                            CornerRadius="8" />
+
+                    <Button x:Name="PauseButton"
+                            Grid.Column="1"
+                            Text="⏸️ Pause"
+                            Clicked="OnPauseAudioClicked"
+                            BackgroundColor="#3498DB"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35"
+                            CornerRadius="8" />
+
+                    <Button x:Name="StopButton"
+                            Grid.Column="2"
+                            Text="⏹️ Stop"
+                            Clicked="OnStopAudioClicked"
+                            BackgroundColor="#E74C3C"
+                            TextColor="White"
+                            FontSize="12"
+                            HeightRequest="35"
+                            CornerRadius="8" />
+                </Grid>
+
+                <ProgressBar x:Name="AudioProgressBar"
+                             Progress="0"
+                             HeightRequest="10"
+                             ProgressColor="#27AE60"
+                             BackgroundColor="#2C3E50" />
+
+                <Label x:Name="TimeLabel"
+                       Text="00:00 / 00:30"
+                       FontSize="12"
+                       TextColor="#BBBBBB"
+                       HorizontalOptions="Center" />
+
+                <Button Text="❌ Cerrar"
+                        Clicked="OnClosePlayerClicked"
+                        BackgroundColor="#9B59B6"
+                        TextColor="White"
+                        FontSize="12"
+                        HorizontalOptions="End"
+                        CornerRadius="8" />
+            </VerticalStackLayout>
+        </Frame>
     </Grid>
 </ContentPage>

@@ -1,13 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <TabbedPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:android="clr-namespace:Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;assembly=Microsoft.Maui.Controls"
             xmlns:local="clr-namespace:proyectomiguelangel"
             x:Class="proyectomiguelangel.MainPage"
             Title="Song Finder"
             BarBackground="#1A173A"
             BarTextColor="#27AE60"
             SelectedTabColor="#27AE60"
-            UnselectedTabColor="#BBBBBB">
+            UnselectedTabColor="#BBBBBB"
+            android:TabbedPage.IsSwipePagingEnabled="true"
+            android:TabbedPage.OffscreenPageLimit="2">
 
     <TabbedPage.Children>
         <!-- Pestaña 1: Buscador de Letras -->

@@ -607,17 +607,26 @@ namespace proyectomiguelangel
 
         private bool UpdateProgress()
         {
+            // Verificar que el audioPlayer existe y está reproduciendo
             if (_audioPlayer != null && _isAudioPlaying && _audioPlayer.Duration > 0)
             {
                 var currentTime = _audioPlayer.CurrentPosition;
                 var duration = _audioPlayer.Duration;
 
-                AudioProgressBar.Progress = currentTime / duration;
-                TimeLabel.Text = $"{TimeSpan.FromSeconds(currentTime):mm\\:ss} / {TimeSpan.FromSeconds(duration):mm\\:ss}";
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    // Actualizar barra de progreso y tiempo
+                    AudioProgressBar.Progress = currentTime / duration;
+                    TimeLabel.Text = $"{TimeSpan.FromSeconds(currentTime):mm\\:ss} / {TimeSpan.FromSeconds(duration):mm\\:ss}";
+                });
+
+                // Continuar el temporizador mientras se reproduce
+                return true;
             }
+
+            // Si no se está reproduciendo, detener el temporizador
             return _isAudioPlaying;
         }
-
         private void OnPlaybackEnded(object sender, EventArgs e)
         {
             MainThread.BeginInvokeOnMainThread(() =>
@@ -641,6 +650,9 @@ namespace proyectomiguelangel
                 _audioPlayer.Play();
                 _isAudioPlaying = true;
                 UpdatePlaybackControls();
+
+                // REINICIAR el temporizador al reanudar
+                Device.StartTimer(TimeSpan.FromMilliseconds(100), UpdateProgress);
             }
         }
 
